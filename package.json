@@ -1,0 +1,29 @@
+{
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "expo": "^34.0.1",
+    "expo-font": "^6.0.1",
+    "lottie-ios": "^3.0.3",
+    "lottie-react-native": "^2.6.1",
+    "react": "16.8.3",
+    "react-dom": "^16.8.6",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
+    "react-native-action-button": "^2.8.5",
+    "react-native-bottom-drawer": "^1.0.2",
+    "react-native-keyboard-aware-scroll-view": "^0.8.0",
+    "react-native-vector-icons": "^6.4.2",
+    "react-native-web": "^0.11.4",
+    "react-navigation": "^3.0.9"
+  },
+  "devDependencies": {
+    "babel-preset-expo": "^6.0.0"
+  },
+  "private": true
+}
