@@ -19,7 +19,7 @@ const gateway = async (path, method = 'GET', body, token = true) => {
     } catch (e) {
         return Promise.reject(e);
     }
-}
+};
 
 export {
     gateway

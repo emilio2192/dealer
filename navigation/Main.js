@@ -3,6 +3,8 @@ import {createBottomTabNavigator, createStackNavigator, TabBarBottom} from 'reac
 import HomeScreen from '../screens/HomeScreen';
 import Colors from '../constants/Colors';
 import Entypo from '@expo/vector-icons/Entypo';
+import History from '../screens/history';
+import {ProfileScreen} from "../screens/profile";
 
 const HomeStack = createStackNavigator({
     Main: HomeScreen,
@@ -16,7 +18,35 @@ HomeStack.navigationOptions = ({navigation}) => {
     return {
         tabBarVisible
     }
-}
+};
+
+const HistoryStack = createStackNavigator({
+    Report: History,
+});
+HistoryStack.navigationOptions = ({navigation}) => {
+    let tabBarVisible = false;
+    const routeName = navigation.state.routes[navigation.state.index].routeName
+    if (routeName == 'Report') {
+        tabBarVisible = true
+    }
+    return {
+        tabBarVisible
+    }
+};
+
+const ProfileStack = createStackNavigator({
+    Profile: ProfileScreen
+});
+ProfileStack.navigationOptions = ({navigation}) => {
+    let tabBarVisible = false;
+    const routeName = navigation.state.routes[navigation.state.index].routeName
+    if (routeName == 'Report') {
+        tabBarVisible = true
+    }
+    return {
+        tabBarVisible
+    }
+};
 
 const RootStack = createBottomTabNavigator(
     {
@@ -25,6 +55,22 @@ const RootStack = createBottomTabNavigator(
             navigationOptions: ({navigation}) => ({
                 tabBarIcon: ({focused, tintColor}) => {
                     return <Entypo name="home" size={30} color={tintColor}/>;
+                },
+            })
+        },
+        History: {
+            screen: History,
+            navigationOptions: ({navigation}) => ({
+                tabBarIcon: ({focused, tintColor}) => {
+                    return <Entypo name="text-document" size={30} color={tintColor}/>;
+                },
+            })
+        },
+        Profile: {
+            screen: ProfileScreen,
+            navigationOptions: ({navigation}) => ({
+                tabBarIcon: ({focused, tintColor}) => {
+                    return <Entypo name="user" size={30} color={tintColor}/>;
                 },
             })
         }

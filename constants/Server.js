@@ -1,5 +1,6 @@
 export default {
     domain: 'https://api-services-llevole.herokuapp.com',
+    local: 'http://192.168.0.16:3000/',
     headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',

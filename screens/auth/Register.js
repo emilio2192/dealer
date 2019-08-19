@@ -39,7 +39,7 @@ export class RegisterScreen extends React.Component {
                 areaMobileCountry: '502',
                 password: '',
                 passwordConfirm: '',
-                userType: 'client',
+                userType: 'messenger',
                 countryCode: 'GTM'
             }
 

@@ -8,7 +8,9 @@ export default {
     price: '/assignment/price',
     payment: '/assignment/payment',
     createAssignement: '/assignment/create',
-    GetAssignement: (user) => `/assignment/user/${user}`,
     MessengerLocation: '/assignment/messenger-location',
-    GetPackage: (user)=> `/user/package-balance/${user}`
+    messengerConnection: '/user/messenger-connection/',
+    changeMessengerLocationAssigment: '/assignment/set-messenger-location/',
+    getAssigment: 'assignment/get-assignament-messenger'
+
 }

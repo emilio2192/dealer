@@ -6,6 +6,7 @@ import {createAppContainer, createSwitchNavigator} from 'react-navigation';
 import * as Font from 'expo-font';
 import RootStack from './navigation/Main';
 
+
 const navigator = createSwitchNavigator(
     {
         AuthLoading: AuthLoadingScreen,
@@ -27,17 +28,21 @@ export default class App extends Component {
 
 
     async componentDidMount() {
-        
-        await Font.loadAsync({
-            'roboto-bold': require('./assets/fonts/Roboto/Roboto-Bold.ttf'),
-            'roboto-black': require('./assets/fonts/Roboto/Roboto-Black.ttf'),
-            'roboto': require('./assets/fonts/Roboto/Roboto-Regular.ttf'),
-            'roboto-thin': require('./assets/fonts/Roboto/Roboto-Thin.ttf'),
-            'roboto-light': require('./assets/fonts/Roboto/Roboto-Light.ttf'),
-            'roboto-semibold': require('./assets/fonts/Roboto/Roboto-Medium.ttf'),
-            'bebas': require('./assets/fonts/bebas_neue/BebasNeue-Regular.ttf'),
-        });
-        this.setState({fontLoaded: true});
+        try{
+            await Font.loadAsync({
+                'roboto-bold': require('./assets/fonts/Roboto/Roboto-Bold.ttf'),
+                'roboto-black': require('./assets/fonts/Roboto/Roboto-Black.ttf'),
+                'roboto': require('./assets/fonts/Roboto/Roboto-Regular.ttf'),
+                'roboto-thin': require('./assets/fonts/Roboto/Roboto-Thin.ttf'),
+                'roboto-light': require('./assets/fonts/Roboto/Roboto-Light.ttf'),
+                'roboto-semibold': require('./assets/fonts/Roboto/Roboto-Medium.ttf'),
+                'bebas': require('./assets/fonts/bebas_neue/BebasNeue-Regular.ttf'),
+            });
+            this.setState({fontLoaded: true});
+        }catch(e){
+            console.log(e);
+        }
+
     }
 
     render() {
