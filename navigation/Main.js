@@ -40,7 +40,7 @@ const ProfileStack = createStackNavigator({
 ProfileStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = false;
     const routeName = navigation.state.routes[navigation.state.index].routeName
-    if (routeName == 'Report') {
+    if (routeName == 'Profile') {
         tabBarVisible = true
     }
     return {

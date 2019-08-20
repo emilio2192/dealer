@@ -15,7 +15,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler'; 
 
 export class ProfileScreen extends React.Component {
     static navigationOptions = {

@@ -34,16 +34,20 @@ export class LoginScreen extends React.Component {
                 headers: constants.headers,
                 body: JSON.stringify(this.state.data)
             });
-
-            const body = JSON.parse(response._bodyInit);
+            
+            const responseJson = await response.json();
+            console.log(responseJson);
+            console.log("RESPONSE ",response);
             if (response.status === 401 && response.ok === false && body.verified === false) {
                 this.props.navigation.navigate('Verify');
                 return;
             }
+            
             if (response.ok && response.status === 200) {
-                await AsyncStorage.setItem("token", JSON.stringify(body.token));
-                await AsyncStorage.setItem("userInformation", JSON.stringify(body.user));
-                await AsyncStorage.setItem("userStatus", JSON.stringify(false));
+                await AsyncStorage.setItem("token", JSON.stringify(responseJson.token));
+                await AsyncStorage.setItem("userInformation", JSON.stringify(responseJson.user));
+                await AsyncStorage.setItem("userStatus", "false");
+                console.log('inside');
                 this.props.navigation.navigate('Main');
 
             } else {
