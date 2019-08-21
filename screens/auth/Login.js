@@ -15,6 +15,7 @@ export class LoginScreen extends React.Component {
 
     constructor(props) {
         super(props);
+        const _isMount = false;
         this.state = {
             // shift: new Animated.Value(0),
             data: {
@@ -25,9 +26,16 @@ export class LoginScreen extends React.Component {
         };
     }
 
+    componentDidMount() {
+        this._isMount = true;
+        // this.validationForStart();
+    }
 
     login = async () => {
         try {
+            if(!this.forceUpdate){
+                return;
+            }
             this.setState({sending: true});
             let response = await fetch(constants.domain + endpoints.signIn, {
                 method: 'POST',

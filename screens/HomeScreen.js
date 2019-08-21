@@ -5,7 +5,9 @@ import assigment from '../services/Assignments';
 import { AsyncStorage } from 'react-native';
 
 export default class HomeScreen extends React.Component {
+    
     constructor(props) {
+        const _isMount = false;
         super(props);
         this.state = {
             statusDelivery: false,
@@ -13,12 +15,18 @@ export default class HomeScreen extends React.Component {
         };
     }
 
-    async componentDidMount() {
-        const userStatus = await AsyncStorage.getItem('userStatus');
-        this.setState({userStatus: userStatus});
-        console.log(userStatus);
-        if (userStatus === 'true') {
-            // assigment.startGetAssignments();
+    componentDidMount() {
+        this._isMount = true;
+        // this.validationForStart();
+    }
+    validationForStart = async () => {
+        if(this._isMount){
+            const userStatus = await AsyncStorage.getItem('userStatus');
+            this.setState({userStatus: userStatus});
+            console.log(userStatus);
+            if (userStatus === 'true') {
+                assigment.startGetAssignments();
+            }
         }
     }
 
@@ -27,11 +35,13 @@ export default class HomeScreen extends React.Component {
     };
     changeStatus = async () => {
         if (this.state.userStatus === "true") {
-            // assigment.stopGetAssignments();
+            assigment.disconnectMessenger();
+            assigment.stopGetAssignments();
             await AsyncStorage.setItem('userStatus', 'false');
             this.setState({userStatus: 'true'});
         } else {
-            // assigment.startGetAssignments();
+            assigment.connectMessenger();
+            assigment.startGetAssignments();
             await AsyncStorage.setItem('userStatus', 'true');
             this.setState({userStatus: 'false'});
         }

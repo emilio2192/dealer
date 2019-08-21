@@ -79,12 +79,6 @@ export class ProfileScreen extends React.Component {
                         </Text>
                     </View>
                     <TouchableOpacity
-                        style={styles.actionCard}
-                        onPress={() => this.props.navigation.navigate('Payment')}>
-                        <Text style={styles.cardTitle}>Método de pago</Text>
-                        <EvilIcons name="chevron-right" size={24} color="black" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
                         style={styles.signOutBtn}
                         onPress={() => this.signOut()}>
                         <Ionicons name="ios-exit" size={20} style={{ marginRight: 10 }}/>
