@@ -1,6 +1,6 @@
 import React from 'react'
 import * as BackgroundFetch from 'expo-background-fetch';
-import {AsyncStorage} from "react-native-web";
+import {AsyncStorage} from "react-native";
 import endpoints from '../constants/Endpoints';
 import {gateway} from '../services/gateway';
 
@@ -75,10 +75,25 @@ let interval;
 const startGetAssignments = async () => {
 
     interval = setInterval(async () => {
-        // const data = {};
-        // const response = await gateway(endpoints.getAssigment, 'POST', data);
+        
+        if(assignment === null){
+            let user = await AsyncStorage.getItem("userInformation");
+            user = JSON.parse(user);
+            const data = {
+                messengerId: user.id
+            };
+            const response = await gateway(endpoints.getAssigment, 'POST', data);
+            const assignment = await AsyncStorage.getItem('assignment');
+            await AsyncStorage.setItem('assignment', response.assignmentID);
+            console.log('Asignado');
+        }
+        
     }, 1000 * 5)
 };
+
+const setMessengerAssignment = () => {
+
+}
 
 const stopGetAssignments = () => {
     clearInterval(interval);

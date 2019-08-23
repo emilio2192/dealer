@@ -15,7 +15,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Entypo from '@expo/vector-icons/Entypo';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView } from 'react-native-gesture-handler'; 
 
 export class ProfileScreen extends React.Component {
     static navigationOptions = {
@@ -78,12 +78,6 @@ export class ProfileScreen extends React.Component {
                             {this.state.user.mobile}
                         </Text>
                     </View>
-                    <TouchableOpacity
-                        style={styles.actionCard}
-                        onPress={() => this.props.navigation.navigate('Payment')}>
-                        <Text style={styles.cardTitle}>Método de pago</Text>
-                        <EvilIcons name="chevron-right" size={24} color="black" />
-                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.signOutBtn}
                         onPress={() => this.signOut()}>
