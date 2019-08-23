@@ -16,8 +16,18 @@ export default class HomeScreen extends React.Component {
     }
 
     componentDidMount() {
-        this._isMount = true;
-        // this.validationForStart();
+
+    }
+    async componentDidMount(){
+        const userStatus = await AsyncStorage.getItem('userStatus');
+        this.setState({userStatus: userStatus});
+        const messengerAssigment = await assigment.getMessengerAssignment();
+        console.log(messengerAssigment);
+        if(messengerAssigment !== null){
+            await AsyncStorage.setItem('assignment', messengerAssigment.assignment.assignmentID);
+            // send to screen
+            this.props.navigation.navigate('History');
+        }
     }
     validationForStart = async () => {
         if(this._isMount){
@@ -34,6 +44,13 @@ export default class HomeScreen extends React.Component {
         header: null,
     };
     changeStatus = async () => {
+
+        const assignment = await AsyncStorage.getItem("assignment");
+        if(assignment !== null){
+            await AsyncStorage.setItem('userStatus', 'true');
+            assigment.connectMessenger();
+            return;
+        }
         if (this.state.userStatus === "true") {
             assigment.disconnectMessenger();
             assigment.stopGetAssignments();
@@ -51,11 +68,11 @@ export default class HomeScreen extends React.Component {
     displayIconStatus = () => {
         if (this.state.userStatus === "true") {
             return [<Text key={'online'}>En linea</Text>,
-                <MaterialCommunityIcons key={'powerOn'} name="play-speed" size={45} color="black"
+                <MaterialCommunityIcons key={'powerOn'} name="play-speed" size={50} color="black"
                                         onPress={() => this.changeStatus()}/>];
         } else {
             return [<Text key={'offline'}>Fuera de linea</Text>,
-                <AntDesign key={'iconOff'} name="poweroff" size={35} color="black"
+                <AntDesign key={'iconOff'} name="poweroff" size={50} color="black"
                            onPress={() => this.changeStatus()}/>]
         }
     }

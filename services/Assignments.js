@@ -75,24 +75,32 @@ let interval;
 const startGetAssignments = async () => {
 
     interval = setInterval(async () => {
-        
+        const assignment = await AsyncStorage.getItem('assignment');
         if(assignment === null){
             let user = await AsyncStorage.getItem("userInformation");
             user = JSON.parse(user);
             const data = {
                 messengerId: user.id
             };
-            const response = await gateway(endpoints.getAssigment, 'POST', data);
-            const assignment = await AsyncStorage.getItem('assignment');
-            await AsyncStorage.setItem('assignment', response.assignmentID);
+            const response = await gateway(endpoints.setMessengerAssignment, 'POST', data);
+
+            console.log("set assignment ",response);
+            // await AsyncStorage.setItem('assignment', response.assignmentID);
             console.log('Asignado');
         }
         
     }, 1000 * 5)
 };
 
-const setMessengerAssignment = () => {
-
+const getMessengerAssignment = async () => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const data = {
+        messengerId: user.id
+    };
+    const response = await gateway(endpoints.getAssigment, 'POST', data);
+    // await AsyncStorage.setItem('assignment', response.assignment.assignmentID);
+    return response;
 }
 
 const stopGetAssignments = () => {
@@ -103,5 +111,6 @@ export default {
     startGetAssignments,
     stopGetAssignments,
     connectMessenger,
-    disconnectMessenger
+    disconnectMessenger,
+    getMessengerAssignment
 }
