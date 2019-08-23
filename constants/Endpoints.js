@@ -11,6 +11,6 @@ export default {
     MessengerLocation: '/assignment/messenger-location',
     messengerConnection: '/user/messenger-connection/',
     changeMessengerLocationAssigment: '/assignment/set-messenger-location/',
-    getAssigment: 'assignment/get-assignament-messenger'
+    getAssigment: '/assignment/get-assignament-messenger',
 
 }

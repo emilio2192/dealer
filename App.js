@@ -14,7 +14,7 @@ const navigator = createSwitchNavigator(
         Auth: AuthStack,
     },
     {
-        initialRouteName: 'App',
+        initialRouteName: 'AuthLoading',
     }
 );
 const AppContainer = createAppContainer(navigator);
