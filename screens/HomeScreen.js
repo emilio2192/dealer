@@ -15,9 +15,6 @@ export default class HomeScreen extends React.Component {
         };
     }
 
-    componentDidMount() {
-
-    }
     async componentDidMount(){
         const userStatus = await AsyncStorage.getItem('userStatus');
         this.setState({userStatus: userStatus});
