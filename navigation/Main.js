@@ -5,9 +5,11 @@ import Colors from '../constants/Colors';
 import Entypo from '@expo/vector-icons/Entypo';
 import History from '../screens/history';
 import {ProfileScreen} from "../screens/profile";
+import NavigatorScreen from '../screens/NavigatorScreen';
 
 const HomeStack = createStackNavigator({
     Main: HomeScreen,
+    Navigator: NavigatorScreen
 });
 HomeStack.navigationOptions = ({navigation}) => {
     let tabBarVisible = false;

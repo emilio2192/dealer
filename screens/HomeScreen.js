@@ -20,6 +20,9 @@ export default class HomeScreen extends React.Component {
         if (userStatus === 'true') {
             // assigment.startGetAssignments();
         }
+        setTimeout(() => {
+            this.props.navigation.navigate('Navigator');
+        }, 1000);
     }
 
     static navigationOptions = {
