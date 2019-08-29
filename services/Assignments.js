@@ -106,11 +106,33 @@ const getMessengerAssignment = async () => {
 const stopGetAssignments = () => {
     clearInterval(interval);
 };
+
+const getHistoryAssignments = async () => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const data = {
+        messengerId: user.id
+    };
+    const response = await gateway(endpoints.historyAssignment, 'POST', data);
+    return response;
+}
+const confirm = async (status) => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const assignmentId = await AsyncStorage.getItem('assignment');
+    const data = {
+        messengerId: user.id,
+        assignmentID: assignmentId ,
+        confirm: status
+    };
+}
 export default {
     // sendUpdateLocation,
     startGetAssignments,
     stopGetAssignments,
     connectMessenger,
     disconnectMessenger,
-    getMessengerAssignment
+    getMessengerAssignment,
+    getHistoryAssignments,
+    confirm
 }

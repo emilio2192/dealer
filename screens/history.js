@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {FlatList, Text, View} from 'react-native';
+import assigment from '../services/Assignments';
 
 export default class History extends React.Component {
     constructor(props) {
@@ -32,6 +33,11 @@ export default class History extends React.Component {
                 }
             ]
         }
+    }
+
+    async componentDidMount() {
+        const history = await assigment.getHistoryAssignments();
+        console.log('response', history);
     }
 
     cardRender = (data) => {

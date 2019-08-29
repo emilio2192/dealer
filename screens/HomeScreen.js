@@ -1,8 +1,10 @@
 import * as React from 'react';
 import {Dimensions, Text, View} from 'react-native';
+import AlertAsync from "react-native-alert-async";
 import {AntDesign, MaterialCommunityIcons} from '@expo/vector-icons';
 import assigment from '../services/Assignments';
 import { AsyncStorage } from 'react-native';
+
 
 export default class HomeScreen extends React.Component {
     
@@ -18,35 +20,37 @@ export default class HomeScreen extends React.Component {
     async componentDidMount(){
         const userStatus = await AsyncStorage.getItem('userStatus');
         this.setState({userStatus: userStatus});
-        const messengerAssigment = await assigment.getMessengerAssignment();
-        console.log(messengerAssigment);
-        if(messengerAssigment !== null){
-            await AsyncStorage.setItem('assignment', messengerAssigment.assignment.assignmentID);
-            // send to screen
-            this.props.navigation.navigate('History');
-        }
-    }
-    validationForStart = async () => {
-        if(this._isMount){
-            const userStatus = await AsyncStorage.getItem('userStatus');
-            this.setState({userStatus: userStatus});
-            console.log(userStatus);
-            if (userStatus === 'true') {
-                assigment.startGetAssignments();
+
+        const assignmentId = await AsyncStorage.getItem("assignment");
+        console.log('assignment', assignmentId);
+        if(assignmentId !== null){
+            const confirmedAssignment = await AsyncStorage.getItem("confirmedAssignment");
+            if(confirmedAssignment===null || confirmedAssignment === 'false'){
+                this.confirmedAlert();
+            }else{
+                // send to screen
+                // this.props.navigation.navigate('History');
             }
+
         }
     }
+
 
     static navigationOptions = {
         header: null,
     };
     changeStatus = async () => {
 
-        const assignment = await AsyncStorage.getItem("assignment");
-        if(assignment !== null){
+        const assignmentId = await AsyncStorage.getItem("assignment");
+        const confirmedAssignment = await AsyncStorage.getItem("confirmedAssignment");
+        if(assignmentId !== null){
             await AsyncStorage.setItem('userStatus', 'true');
             assigment.connectMessenger();
-            return;
+            if(confirmedAssignment===null || confirmedAssignment==='false'){
+                this.confirmedAlert();
+            }else{
+                return;
+            }
         }
         if (this.state.userStatus === "true") {
             assigment.disconnectMessenger();
@@ -72,6 +76,28 @@ export default class HomeScreen extends React.Component {
                 <AntDesign key={'iconOff'} name="poweroff" size={50} color="black"
                            onPress={() => this.changeStatus()}/>]
         }
+    }
+
+    confirmedAlert = async () => {
+        const message = 'Desea realizar asignación?';
+        const choice = await AlertAsync(
+            'Confirmar',
+            message,
+            [
+                {text: 'Aceptar', onPress: () => Promise.resolve(true)},
+                {text: 'No', onPress: () => Promise.resolve(false)},
+            ],
+            {
+                cancelable: false,
+                onDismiss: () => Promise.resolve(false),
+            },
+        );
+        if(choice){
+            await AsyncStorage.setItem('confirmedAssignment', 'true');
+            // send to screen
+            // this.props.navigation.navigate('History');
+        }
+        assigment.confirm(choice);
     }
 
     render() {
