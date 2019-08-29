@@ -1,6 +1,6 @@
 import React from 'react'
 import * as BackgroundFetch from 'expo-background-fetch';
-import {AsyncStorage} from "react-native-web";
+import {AsyncStorage} from "react-native";
 import endpoints from '../constants/Endpoints';
 import {gateway} from '../services/gateway';
 
@@ -75,18 +75,64 @@ let interval;
 const startGetAssignments = async () => {
 
     interval = setInterval(async () => {
-        // const data = {};
-        // const response = await gateway(endpoints.getAssigment, 'POST', data);
+        const assignment = await AsyncStorage.getItem('assignment');
+        if(assignment === null){
+            let user = await AsyncStorage.getItem("userInformation");
+            user = JSON.parse(user);
+            const data = {
+                messengerId: user.id
+            };
+            const response = await gateway(endpoints.setMessengerAssignment, 'POST', data);
+
+            console.log("set assignment ",response);
+            // await AsyncStorage.setItem('assignment', response.assignmentID);
+            console.log('Asignado');
+        }
+        
     }, 1000 * 5)
 };
+
+const getMessengerAssignment = async () => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const data = {
+        messengerId: user.id
+    };
+    const response = await gateway(endpoints.getAssigment, 'POST', data);
+    // await AsyncStorage.setItem('assignment', response.assignment.assignmentID);
+    return response;
+}
 
 const stopGetAssignments = () => {
     clearInterval(interval);
 };
+
+const getHistoryAssignments = async () => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const data = {
+        messengerId: user.id
+    };
+    const response = await gateway(endpoints.historyAssignment, 'POST', data);
+    return response;
+}
+const confirm = async (status) => {
+    let user = await AsyncStorage.getItem("userInformation");
+    user = JSON.parse(user);
+    const assignmentId = await AsyncStorage.getItem('assignment');
+    const data = {
+        messengerId: user.id,
+        assignmentID: assignmentId ,
+        confirm: status
+    };
+}
 export default {
     // sendUpdateLocation,
     startGetAssignments,
     stopGetAssignments,
     connectMessenger,
-    disconnectMessenger
+    disconnectMessenger,
+    getMessengerAssignment,
+    getHistoryAssignments,
+    confirm
 }

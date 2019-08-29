@@ -20,6 +20,7 @@
     "react-dom": "^16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-34.0.0.tar.gz",
     "react-native-action-button": "^2.8.5",
+    "react-native-alert-async": "^1.0.3",
     "react-native-background-fetch": "^2.0.8",
     "react-native-background-task": "^0.2.1",
     "react-native-bottom-drawer": "^1.0.2",

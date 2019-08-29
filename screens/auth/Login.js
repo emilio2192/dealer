@@ -5,6 +5,7 @@ import constants from '../../constants/Server';
 import endpoints from '../../constants/Endpoints';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-navigation';
+import assigment from '../../services/Assignments';
 
 // const { Lottie } = DangerZone;
 
@@ -25,31 +26,34 @@ export class LoginScreen extends React.Component {
         };
     }
 
+    componentDidMount() {
+    }
 
     login = async () => {
         try {
+            if(!this.forceUpdate){
+                return;
+            }
             this.setState({sending: true});
             let response = await fetch(constants.domain + endpoints.signIn, {
                 method: 'POST',
                 headers: constants.headers,
                 body: JSON.stringify(this.state.data)
             });
-            
             const responseJson = await response.json();
-            console.log(responseJson);
-            console.log("RESPONSE ",response);
             if (response.status === 401 && response.ok === false && body.verified === false) {
                 this.props.navigation.navigate('Verify');
                 return;
             }
-            
             if (response.ok && response.status === 200) {
                 await AsyncStorage.setItem("token", JSON.stringify(responseJson.token));
                 await AsyncStorage.setItem("userInformation", JSON.stringify(responseJson.user));
                 await AsyncStorage.setItem("userStatus", "false");
-                console.log('inside');
+                const messengerAssigment = await assigment.getMessengerAssignment();
+                if(messengerAssigment){
+                    await AsyncStorage.setItem('assignment', messengerAssigment.assignment.assignmentId);
+                }
                 this.props.navigation.navigate('Main');
-
             } else {
                 alert(body.msg);
             }
