@@ -8,18 +8,21 @@ import GOOGLE from '../constants/Google';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MapViewDirections from 'react-native-maps-directions';
 import Colors from '../constants/Colors';
+import { LocationList } from '../components/LocationList';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 let savedRegion;
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
-const LATITUDE = 14.6108992;
-const LONGITUDE = -90.51908639999999;
-const LATITUDE_DELTA = 0.003;
+const LATITUDE = 14.521837;
+const LONGITUDE = -90.600022;
+const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 export default class NavigatorScreen extends React.Component {
     constructor(props) {
         super(props);
+        this.mapView = null;
     }
 
     static navigationOptions = {
@@ -30,8 +33,6 @@ export default class NavigatorScreen extends React.Component {
         region: {
             latitude: 0,
             longitude: 0,
-            latitudeDelta: 0,
-            longitudeDelta: 0
         },
         coordinate: new AnimatedRegion({
             latitude: LATITUDE,
@@ -39,9 +40,31 @@ export default class NavigatorScreen extends React.Component {
             latitudeDelta: LATITUDE_DELTA,
             longitudeDelta: LONGITUDE_DELTA
         }),
+        origin: {
+            latitude: LATITUDE,
+            longitude: LONGITUDE,
+        },
         destinationCoordinate: {
-            latitude: 14.521837,
-            longitude: -90.600022
+            latitude: 14.601988,
+            longitude: -90.509842
+        },
+        item: {
+            locations: [
+                {
+                    address: "Address 1",
+                    brief: "This is a brief for address 1"
+                },
+                {
+                    address: "Address 2",
+                    brief: "This is a brief for address 2",
+                    active: true,
+                    cash: true
+                },
+                {
+                    address: "Address 3",
+                    brief: "This is a brief for address 3"
+                }
+            ]
         }
     };
 
@@ -49,7 +72,7 @@ export default class NavigatorScreen extends React.Component {
         this.getInitialState();
         setInterval(() => {
             this.getInitialState();
-        }, 8000);
+        }, 15000);
     }
 
     fetchFollowingPoint() {
@@ -57,7 +80,6 @@ export default class NavigatorScreen extends React.Component {
     }
 
     getInitialState() {
-        console.log("Getting user location");
         getLocation().then(data => {
             this.updateState({
                 latitude: data.latitude,
@@ -68,19 +90,16 @@ export default class NavigatorScreen extends React.Component {
     }
 
     updateState(location) {
-        savedRegion = {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            latitudeDelta: 0.003,
-            longitudeDelta: 0.003,
-        }
         this.setState({
-            region: savedRegion,
+            region: {
+                latitude: location.latitude,
+                longitude: location.longitude
+            },
+            origin: {
+                latitude: location.latitude,
+                longitude: location.longitude,
+            }
         });
-    }
-
-    onRegionChange(region) {
-        savedRegion = region;
     }
 
     animate(newLat, newLong) {
@@ -93,43 +112,78 @@ export default class NavigatorScreen extends React.Component {
         };
 
         coordinate.timing(newCoordinate).start();
+        this.mapView.animateToRegion(newCoordinate, 1000 * 2);
+    }
+
+    async _finishAdress() {
+
     }
 
     render() {
         let width = Dimensions.get('window').width;
-        let height = 300;
+        const height = 400;
+        let { item } = this.state;
+        let activeElement = item.locations.find((element) => { return element.active });
         return (
             <ScrollView style={[styles.container]}>
                 <MapView
                     provider={PROVIDER_GOOGLE}
-                    customMapStyle={GOOGLE.MapStyle}
+                    customMapStyle={GOOGLE.MinimalMap}
                     style={{ width: width, height: height }}
-                    initialRegion={{
-                        latitude: LATITUDE,
-                        longitude: LONGITUDE,
-                        latitudeDelta: LATITUDE_DELTA,
-                        longitudeDelta: LONGITUDE_DELTA,
-                    }}
-                    region={this.state.region}
-                    onRegionChange={(reg) => this.onRegionChange(reg)}
+                    region={{...this.state.region, latitudeDelta: LATITUDE_DELTA, longitudeDelta: LONGITUDE_DELTA}}
                     ref={c => this.mapView = c}>
                     <Marker.Animated
-                        coordinate={this.state.coordinate}
+                        coordinate={this.state.region}
                         ref={marker => { this.marker = marker; }}>
                         <MaterialIcons name="person-pin-circle" size={44} color="#ffb600" />
                     </Marker.Animated>
                     <MapViewDirections
-                        origin={this.state.coorditane}
+                        origin={this.state.origin}
                         destination={this.state.destinationCoordinate}
                         apikey={GOOGLE.apiKey}
                         strokeWidth={3}
-                        strokeColor={Colors.CIAN}
-                        onReady={async result => { console.log(result); }}
+                        strokeColor="hotpink"
+                        optimizeWaypoints={false}
+                        onStart={(params) => {
+                            console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
+                        }}
+                        onReady={result => {
+                            console.log('Distance: ${result.distance} km')
+                            console.log('Duration: ${result.duration} min.')
+
+                            this.mapView.fitToCoordinates(result.coordinates, {
+                                edgePadding: {
+                                    right: (width / 20),
+                                    bottom: (height / 20),
+                                    left: (width / 20),
+                                    top: (height / 20),
+                                }
+                            });
+                        }}
+                        onError={(errorMessage) => {
+                            // console.log('GOT AN ERROR');
+                        }}
                     />
                 </MapView>
                 <View style={styles.orderDetails}>
-                    <Text>Siguiente punto: </Text>
-                    <Text>Detalle</Text>
+                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 20 }}>Dirección: {activeElement.address}</Text>
+                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 14 }}>Pago en efectivo: {activeElement.cash ? 'Sí' : 'No'}</Text>
+                    <View style={{ paddingTop: 20 }}>
+                        {
+                            item.locations.map((location, index) => (
+                                <LocationList
+                                    location={location}
+                                    index={index}
+                                    key={index}
+                                />
+                            ))
+                        }
+                    </View>
+                    <TouchableOpacity
+                        style={styles.completeButton}
+                        onPress={() => this._finishAdress()}>
+                        <Text style={{ color: '#f43535', fontWeight: 'bold' }}>FINALIZAR PUNTO</Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView >
         );
@@ -144,5 +198,34 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
+    orderDetails: {
+        paddingHorizontal: 24,
+        paddingBottom: 50,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        shadowColor: '#727272',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.8,
+        shadowRadius: 5,
+        elevation: 15,
+        backgroundColor: 'white',
+        top: -50,
+        paddingTop: 40,
+        marginBottom: -50
+    },
+    completeButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderWidth: 2,
+        borderColor: '#f43535',
+        padding: 10,
+        height: 50,
+        borderRadius: 5,
+        alignSelf: 'stretch',
+        zIndex: 10,
+        fontFamily: 'roboto-bold',
+        marginTop: 20
+    }
 });
 
