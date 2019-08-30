@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dimensions, Text, View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { Dimensions, Text, View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import assigment from '../services/Assignments';
 import MapView, { PROVIDER_GOOGLE, ProviderPropType, Marker, AnimatedRegion } from 'react-native-maps';
@@ -10,14 +10,17 @@ import MapViewDirections from 'react-native-maps-directions';
 import Colors from '../constants/Colors';
 import { LocationList } from '../components/LocationList';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { getDistance } from 'geolib';
 
 let savedRegion;
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 const LATITUDE = 14.521837;
 const LONGITUDE = -90.600022;
-const LATITUDE_DELTA = 0.0922;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const LATITUDE_DELTA = 0.003;
+const LONGITUDE_DELTA = 0.003;
+let globalInterval;
+const FINISH_DISTANCE = 15;
 
 export default class NavigatorScreen extends React.Component {
     constructor(props) {
@@ -44,25 +47,37 @@ export default class NavigatorScreen extends React.Component {
             latitude: LATITUDE,
             longitude: LONGITUDE,
         },
-        destinationCoordinate: {
-            latitude: 14.601988,
-            longitude: -90.509842
-        },
         item: {
             locations: [
                 {
                     address: "Address 1",
-                    brief: "This is a brief for address 1"
+                    brief: "This is a brief for address 1",
+                    active: true,
+                    cash: false,
+                    coordinate: {
+                        latitude: 14.601988,
+                        longitude: -90.509842
+                    }
                 },
                 {
                     address: "Address 2",
                     brief: "This is a brief for address 2",
-                    active: true,
-                    cash: true
+                    active: false,
+                    cash: true,
+                    coordinate: {
+                        latitude: 14.602471,
+                        longitude: -90.501881
+                    }
                 },
                 {
                     address: "Address 3",
-                    brief: "This is a brief for address 3"
+                    brief: "This is a brief for address 3",
+                    active: false,
+                    cash: false,
+                    coordinate: {
+                        latitude: 14.606811,
+                        longitude: -90.501935
+                    }
                 }
             ]
         }
@@ -70,9 +85,9 @@ export default class NavigatorScreen extends React.Component {
 
     componentDidMount() {
         this.getInitialState();
-        setInterval(() => {
+        globalInterval = setInterval(() => {
             this.getInitialState();
-        }, 15000);
+        }, 5000);
     }
 
     fetchFollowingPoint() {
@@ -116,7 +131,28 @@ export default class NavigatorScreen extends React.Component {
     }
 
     async _finishAdress() {
-
+        const locations = this.state.item.locations;
+        const actualPoint = this.state.item.locations.find((element) => { return element.active }).coordinate;
+        if (getDistance(this.state.origin, actualPoint) <= FINISH_DISTANCE) {
+            const index = locations.findIndex((element) => { return element.active });
+            if (index !== locations.length - 1) {
+                locations[index].active = false;
+                locations[index + 1].active = true;
+                this.setState({ item: { locations } });
+            } else if (index === locations.length - 1) {
+                clearInterval(globalInterval);
+                this.props.navigation.navigate('Main');
+            }
+        } else {
+            Alert.alert(
+                'Distancia requerida',
+                `Sólo puedes finalizar un punto, cuando estés a ${FINISH_DISTANCE} metros de dicho punto.`,
+                [
+                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ],
+                {cancelable: false},
+            );
+        }
     }
 
     render() {
@@ -133,36 +169,21 @@ export default class NavigatorScreen extends React.Component {
                     region={{...this.state.region, latitudeDelta: LATITUDE_DELTA, longitudeDelta: LONGITUDE_DELTA}}
                     ref={c => this.mapView = c}>
                     <Marker.Animated
-                        coordinate={this.state.region}
+                        coordinate={this.state.origin}
                         ref={marker => { this.marker = marker; }}>
-                        <MaterialIcons name="person-pin-circle" size={44} color="#ffb600" />
+                        <MaterialIcons name="person-pin-circle" size={44} color={Colors.YELLOW} />
                     </Marker.Animated>
+                    <Marker
+                        coordinate={activeElement.coordinate}>
+                        <MaterialIcons name="location-on" size={44} color={Colors.YELLOW} />
+                    </Marker>
                     <MapViewDirections
                         origin={this.state.origin}
-                        destination={this.state.destinationCoordinate}
+                        destination={activeElement.coordinate}
                         apikey={GOOGLE.apiKey}
-                        strokeWidth={3}
-                        strokeColor="hotpink"
-                        optimizeWaypoints={false}
-                        onStart={(params) => {
-                            console.log(`Started routing between "${params.origin}" and "${params.destination}"`);
-                        }}
-                        onReady={result => {
-                            console.log('Distance: ${result.distance} km')
-                            console.log('Duration: ${result.duration} min.')
-
-                            this.mapView.fitToCoordinates(result.coordinates, {
-                                edgePadding: {
-                                    right: (width / 20),
-                                    bottom: (height / 20),
-                                    left: (width / 20),
-                                    top: (height / 20),
-                                }
-                            });
-                        }}
-                        onError={(errorMessage) => {
-                            // console.log('GOT AN ERROR');
-                        }}
+                        strokeWidth={4}
+                        strokeColor={Colors.CIAN}
+                        optimizeWaypoints={true}
                     />
                 </MapView>
                 <View style={styles.orderDetails}>
