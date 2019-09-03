@@ -33,8 +33,8 @@ export class ProfileScreen extends React.Component {
         this.setState({ user: userInformation });
     }
 
-    signOut = () => {
-        AsyncStorage.clear();
+    signOut = async () => {
+        await AsyncStorage.clear();
         this.props.navigation.navigate('AuthLoading');
     };
 

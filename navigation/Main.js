@@ -95,6 +95,5 @@ const RootStack = createBottomTabNavigator(
         animationEnabled: true,
         swipeEnabled: true,
     }
-)
-// export default createSwitchNavigator({AuthClientStack});
+);
 export default RootStack;

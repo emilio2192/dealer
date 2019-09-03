@@ -4,6 +4,7 @@ import {AsyncStorage} from "react-native";
 import endpoints from '../constants/Endpoints';
 import {gateway} from '../services/gateway';
 
+
 const LOCATION_TASK_NAME = 'background-location-task';
 const ASSIGNMENT_TASK_NAME = 'background-get-assignment';
 
@@ -72,24 +73,41 @@ const disconnectMessenger = async () => {
     return response;
 };
 let interval;
+// const startGetAssignments = async (_callback) => {
+//
+//     interval = setInterval(async (_callback) => {
+//         console.log('PIDIENDO ASIGNACIONES ----');
+//         const assignment = await AsyncStorage.getItem('assignment');
+//         if(assignment === null){
+//             let user = await AsyncStorage.getItem("userInformation");
+//             user = JSON.parse(user);
+//             const data = {
+//                 messengerId: user.id
+//             };
+//             const response = await gateway(endpoints.setMessengerAssignment, 'POST', data);
+//
+//             console.log("set assignment ",response);
+//             if(response.assignmentID){
+//                 await AsyncStorage.setItem('assignment', response.assignmentID);
+//                 _callback();
+//             }
+//             console.log('Asignado');
+//         }
+//
+//     }, 1000 * 5)
+// };
+
 const startGetAssignments = async () => {
-
-    interval = setInterval(async () => {
-        const assignment = await AsyncStorage.getItem('assignment');
-        if(assignment === null){
-            let user = await AsyncStorage.getItem("userInformation");
-            user = JSON.parse(user);
-            const data = {
-                messengerId: user.id
-            };
-            const response = await gateway(endpoints.setMessengerAssignment, 'POST', data);
-
-            console.log("set assignment ",response);
-            // await AsyncStorage.setItem('assignment', response.assignmentID);
-            console.log('Asignado');
-        }
-        
-    }, 1000 * 5)
+    const assignment = await AsyncStorage.getItem('assignment');
+    if (assignment === null) {
+        let user = await AsyncStorage.getItem("userInformation");
+        user = JSON.parse(user);
+        const data = {
+            messengerId: user.id
+        };
+        const response = await gateway(endpoints.setMessengerAssignment, 'POST', data);
+        return response;
+    }
 };
 
 const getMessengerAssignment = async () => {
@@ -99,9 +117,8 @@ const getMessengerAssignment = async () => {
         messengerId: user.id
     };
     const response = await gateway(endpoints.getAssigment, 'POST', data);
-    // await AsyncStorage.setItem('assignment', response.assignment.assignmentID);
     return response;
-}
+};
 
 const stopGetAssignments = () => {
     clearInterval(interval);
@@ -115,17 +132,23 @@ const getHistoryAssignments = async () => {
     };
     const response = await gateway(endpoints.historyAssignment, 'POST', data);
     return response;
-}
+};
+
 const confirm = async (status) => {
     let user = await AsyncStorage.getItem("userInformation");
     user = JSON.parse(user);
     const assignmentId = await AsyncStorage.getItem('assignment');
     const data = {
         messengerId: user.id,
-        assignmentID: assignmentId ,
+        assignmentID: assignmentId,
         confirm: status
     };
-}
+    await AsyncStorage.setItem("confirmedAssignment", '' + status);
+    const response = await gateway(endpoints.confirmAssignment, 'POST', data);
+    console.log('CONFIRMED ENDPOINT ', response);
+    return response;
+};
+
 export default {
     // sendUpdateLocation,
     startGetAssignments,
