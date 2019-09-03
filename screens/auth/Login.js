@@ -40,7 +40,9 @@ export class LoginScreen extends React.Component {
                 headers: constants.headers,
                 body: JSON.stringify(this.state.data)
             });
+            console.log('LOGIN ',response);
             const responseJson = await response.json();
+            console.log('LOGIN ',responseJson);
             if (response.status === 401 && response.ok === false && body.verified === false) {
                 this.props.navigation.navigate('Verify');
                 return;
@@ -49,10 +51,6 @@ export class LoginScreen extends React.Component {
                 await AsyncStorage.setItem("token", JSON.stringify(responseJson.token));
                 await AsyncStorage.setItem("userInformation", JSON.stringify(responseJson.user));
                 await AsyncStorage.setItem("userStatus", "false");
-                const messengerAssigment = await assigment.getMessengerAssignment();
-                if(messengerAssigment){
-                    await AsyncStorage.setItem('assignment', messengerAssigment.assignment.assignmentId);
-                }
                 this.props.navigation.navigate('Main');
             } else {
                 alert(body.msg);
