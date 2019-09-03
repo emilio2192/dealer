@@ -14,5 +14,6 @@ export default {
     getAssigment: '/assignment/get-assignament-messenger',
     setMessengerAssignment: '/assignment/set-messenger/',
     historyAssignment: '/assignment/messenger',
-    confirmAssignment: '/assignment/confirm-messenger'
+    confirmAssignment: '/assignment/confirm-messenger',
+    GetAssignement: (id) => `/assignment/${id}`,
 }

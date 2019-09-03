@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dimensions, Text, View, StyleSheet, ScrollView, Alert } from 'react-native';
+import { Dimensions, Text, View, StyleSheet, ScrollView, Alert, AsyncStorage } from 'react-native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import assigment from '../services/Assignments';
 import MapView, { PROVIDER_GOOGLE, ProviderPropType, Marker, AnimatedRegion } from 'react-native-maps';
@@ -11,6 +11,8 @@ import Colors from '../constants/Colors';
 import { LocationList } from '../components/LocationList';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { getDistance } from 'geolib';
+import Endpoints from '../constants/Endpoints';
+import { gateway } from '../services/gateway';
 
 let savedRegion;
 const { width, height } = Dimensions.get('window');
@@ -47,51 +49,23 @@ export default class NavigatorScreen extends React.Component {
             latitude: LATITUDE,
             longitude: LONGITUDE,
         },
-        item: {
-            locations: [
-                {
-                    address: "Address 1",
-                    brief: "This is a brief for address 1",
-                    active: true,
-                    cash: false,
-                    coordinate: {
-                        latitude: 14.601988,
-                        longitude: -90.509842
-                    }
-                },
-                {
-                    address: "Address 2",
-                    brief: "This is a brief for address 2",
-                    active: false,
-                    cash: true,
-                    coordinate: {
-                        latitude: 14.602471,
-                        longitude: -90.501881
-                    }
-                },
-                {
-                    address: "Address 3",
-                    brief: "This is a brief for address 3",
-                    active: false,
-                    cash: false,
-                    coordinate: {
-                        latitude: 14.606811,
-                        longitude: -90.501935
-                    }
-                }
-            ]
-        }
+        item: {}
     };
 
-    componentDidMount() {
-        this.getInitialState();
+    async componentDidMount() {
+        // const assignmentId = await AsyncStorage.getItem('assignment');
+        const assignmentId = 'x_lTRmuZF';
+        console.log('ID ASSIGNMENT' + assignmentId);
+        const response = await gateway(Endpoints.GetAssignement(assignmentId), 'GET');
+        console.log('RESPONSE' + response);
+        let item = response.Assignments[0];
+        item.locations[0].active = true;
+        this.setState({ item });
+        console.log('ITEM ' + this.state.item);
+        /*this.getInitialState();
         globalInterval = setInterval(() => {
             this.getInitialState();
-        }, 5000);
-    }
-
-    fetchFollowingPoint() {
-
+        }, 5000);*/
     }
 
     getInitialState() {
@@ -132,8 +106,9 @@ export default class NavigatorScreen extends React.Component {
 
     async _finishAdress() {
         const locations = this.state.item.locations;
-        const actualPoint = this.state.item.locations.find((element) => { return element.active }).coordinate;
-        if (getDistance(this.state.origin, actualPoint) <= FINISH_DISTANCE) {
+        const actualPoint = this.state.item.locations.find((element) => { return element.active });
+        const actualCoor = { latitude: actualPoint.lat, longitude: actualPoint.lng }
+        if (getDistance(this.state.origin, actualCoor) <= FINISH_DISTANCE) {
             const index = locations.findIndex((element) => { return element.active });
             if (index !== locations.length - 1) {
                 locations[index].active = false;
@@ -159,10 +134,10 @@ export default class NavigatorScreen extends React.Component {
         let width = Dimensions.get('window').width;
         const height = 400;
         let { item } = this.state;
-        let activeElement = item.locations.find((element) => { return element.active });
+        let activeElement = item.locations && item.locations.find((element) => { return element.active });
         return (
             <ScrollView style={[styles.container]}>
-                <MapView
+                {item.locations && <MapView
                     provider={PROVIDER_GOOGLE}
                     customMapStyle={GOOGLE.MinimalMap}
                     style={{ width: width, height: height }}
@@ -174,21 +149,21 @@ export default class NavigatorScreen extends React.Component {
                         <MaterialIcons name="person-pin-circle" size={44} color={Colors.YELLOW} />
                     </Marker.Animated>
                     <Marker
-                        coordinate={activeElement.coordinate}>
+                        coordinate={{latitude: activeElement.lat, longitude: activeElement.lng}}>
                         <MaterialIcons name="location-on" size={44} color={Colors.YELLOW} />
                     </Marker>
                     <MapViewDirections
                         origin={this.state.origin}
-                        destination={activeElement.coordinate}
+                        destination={{latitude: activeElement.lat, longitude: activeElement.lng}}
                         apikey={GOOGLE.apiKey}
                         strokeWidth={4}
                         strokeColor={Colors.CIAN}
                         optimizeWaypoints={true}
                     />
-                </MapView>
-                <View style={styles.orderDetails}>
+                </MapView>}
+                {item.locations && <View style={styles.orderDetails}>
                     <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 20 }}>Dirección: {activeElement.address}</Text>
-                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 14 }}>Pago en efectivo: {activeElement.cash ? 'Sí' : 'No'}</Text>
+                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 14 }}>Pago en efectivo: {activeElement.servicePayment ? 'Sí' : 'No'}</Text>
                     <View style={{ paddingTop: 20 }}>
                         {
                             item.locations.map((location, index) => (
@@ -205,7 +180,7 @@ export default class NavigatorScreen extends React.Component {
                         onPress={() => this._finishAdress()}>
                         <Text style={{ color: '#f43535', fontWeight: 'bold' }}>FINALIZAR PUNTO</Text>
                     </TouchableOpacity>
-                </View>
+                </View>}
             </ScrollView >
         );
     }
