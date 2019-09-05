@@ -3,15 +3,25 @@ import { Text, View, StyleSheet } from 'react-native';
 import Colors from '../constants/Colors';
 
 export class LocationList extends React.Component {
+    sendTo = () =>{
+        console.log('sending..');
+        Linking.openURL(`https://www.waze.com/ul?ll=40.75889500%2C-73.98513100&navigate=yes&zoom=17`)
+    }
     render() {
         const { location, index } = this.props;
         return (
-            <View style={location.active ? styles.activeLocation : styles.location}>
+            <View style={location.active ? styles.activeLocation : styles.location}
+
+            >
                 <View style={[styles.locationIndex, location.active ? {backgroundColor: '#8dbc2f'} : {backgroundColor: '#F1F4FA'}]}>
                     <Text style={[{ fontFamily: 'roboto-bold'}, location.active ? {color: '#607f21'} : {color: '#b8c5dd' }]}>{index + 1}</Text>
                 </View>
                 <View style={styles.locationInfo}>
-                    <Text style={styles.locationName}>{location.address}</Text>
+                    <Text
+                        onClick={()=> {
+                            this.sendTo()
+                        }}
+                        style={styles.locationName}>{location.address}</Text>
                     <Text style={location.active ? styles.locationDescriptionActive : styles.locationDescription}>{location.brief}</Text>
                 </View>
             </View>

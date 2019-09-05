@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Dimensions, Text, View, StyleSheet, ScrollView, Alert, AsyncStorage } from 'react-native';
+import { Dimensions, Text, View, StyleSheet, ScrollView, Alert, AsyncStorage, Platform, Linking } from 'react-native';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import assigment from '../services/Assignments';
 import MapView, { PROVIDER_GOOGLE, ProviderPropType, Marker, AnimatedRegion } from 'react-native-maps';
@@ -13,6 +13,8 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { getDistance } from 'geolib';
 import Endpoints from '../constants/Endpoints';
 import { gateway } from '../services/gateway';
+
+import location from '../services/Location';
 
 let savedRegion;
 const { width, height } = Dimensions.get('window');
@@ -56,9 +58,10 @@ export default class NavigatorScreen extends React.Component {
         // const assignmentId = await AsyncStorage.getItem('assignment');
         const assignmentId = 'x_lTRmuZF';
         console.log('ID ASSIGNMENT' + assignmentId);
+        console.log('URL ------', Endpoints.GetAssignement(assignmentId));
         const response = await gateway(Endpoints.GetAssignement(assignmentId), 'GET');
-        console.log('RESPONSE' + response);
-        let item = response.Assignments[0];
+        console.log('RESPONSE' , response);
+        let item = response.Assignment;
         item.locations[0].active = true;
         this.setState({ item });
         console.log('ITEM ' + this.state.item);
@@ -66,15 +69,28 @@ export default class NavigatorScreen extends React.Component {
         globalInterval = setInterval(() => {
             this.getInitialState();
         }, 5000);*/
+
+        if(Platform.OS === 'ios'){
+            this.getInitialState()
+        }
     }
 
     getInitialState() {
         getLocation().then(data => {
-            this.updateState({
-                latitude: data.latitude,
-                longitude: data.longitude,
-            });
-            this.animate(data.latitude, data.longitude);
+            // this.updateState({
+            //     latitude: data.latitude,
+            //     longitude: data.longitude,
+            // });
+            // this.animate(data.latitude, data.longitude);
+            // const dataSend = {
+//             assignmentId: user.id
+//             newLocation: `${data.latitude},${data.longitude}`
+//         };
+//         fetch(endpoints.changeMessengerLocationAssigment, {
+//             method: 'POST',
+//             headers: constants.headers,
+//             body: JSON.stringify(dataSend)
+//         });
         });
     }
 
@@ -149,12 +165,12 @@ export default class NavigatorScreen extends React.Component {
                         <MaterialIcons name="person-pin-circle" size={44} color={Colors.YELLOW} />
                     </Marker.Animated>
                     <Marker
-                        coordinate={{latitude: activeElement.lat, longitude: activeElement.lng}}>
+                        coordinate={{latitude: +activeElement.lat, longitude: +activeElement.lng}}>
                         <MaterialIcons name="location-on" size={44} color={Colors.YELLOW} />
                     </Marker>
                     <MapViewDirections
                         origin={this.state.origin}
-                        destination={{latitude: activeElement.lat, longitude: activeElement.lng}}
+                        destination={{latitude: +activeElement.lat, longitude: +activeElement.lng}}
                         apikey={GOOGLE.apiKey}
                         strokeWidth={4}
                         strokeColor={Colors.CIAN}
@@ -175,6 +191,12 @@ export default class NavigatorScreen extends React.Component {
                             ))
                         }
                     </View>
+
+                    <TouchableOpacity
+                        style={styles.blueButton}
+                        onPress={() => Linking.openURL(`https://www.waze.com/ul?ll=${activeElement.lat}%2C${activeElement.lng}&navigate=yes&zoom=17`)}>
+                        <Text style={{ color: '#38c0e0', fontWeight: 'bold' }}>IR A WAZE</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.completeButton}
                         onPress={() => this._finishAdress()}>
@@ -222,6 +244,20 @@ const styles = StyleSheet.create({
         zIndex: 10,
         fontFamily: 'roboto-bold',
         marginTop: 20
-    }
+    },
+    blueButton: {
+    alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderWidth: 2,
+        borderColor: '#38c0e0',
+        padding: 10,
+        height: 50,
+        borderRadius: 5,
+        alignSelf: 'stretch',
+        zIndex: 10,
+        fontFamily: 'roboto-bold',
+        marginTop: 20
+}
 });
 

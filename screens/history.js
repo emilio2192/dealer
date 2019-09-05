@@ -36,24 +36,26 @@ export default class History extends React.Component {
     }
 
     async componentDidMount() {
+        console.log('in history');
         const history = await assigment.getHistoryAssignments();
-        console.log('response', history);
+        this.setState({dataSource: history.assignments});
+        console.log('response history', history);
     }
 
     cardRender = (data) => {
         return (
             <View style={style.card} key={data.date}>
                 <View style={{ flexDirection:'row'}}>
-                    <Text style={style.subject}>{data.subject}</Text>
+                    <Text style={style.subject}>{data.subject.subject} </Text>
                     <Text style={style.date}>{data.date.substring(0, 10)}</Text>
                 </View>
                 <View style={{flex:3}}>
                     <View style={{flex:1}}>
-                        <Text style={{textAlign: 'right', paddingRight:5, paddingTop:10}}>{data.paymentStatus}</Text>
+                        <Text style={{textAlign: 'right', paddingRight:5, paddingTop:10}}>{data.messengerPaid? 'PAGADO' : 'PENDIENTE'}</Text>
                     </View>
                     <View style={{flex:1}}>
                         <Text style={{fontSize:15, textAlign:'left', paddingLeft:10}}>
-                            Contacto: {data.contactName}
+                            Contacto: {data.subject.contactName}
                         </Text>
                     </View>
                 </View>

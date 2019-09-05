@@ -130,6 +130,7 @@ const getHistoryAssignments = async () => {
     const data = {
         messengerId: user.id
     };
+    console.log('getHistory', data);
     const response = await gateway(endpoints.historyAssignment, 'POST', data);
     return response;
 };

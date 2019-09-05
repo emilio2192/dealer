@@ -67,10 +67,15 @@ export default class HomeScreen extends React.Component {
             console.log('ASSIGNMENT ++++++++++++');
             const assignmentId = await AsyncStorage.getItem("assignment");
             const confirmedAssignment = await AsyncStorage.getItem("confirmedAssignment");
-            if ((assignmentId !== null || assignmentId) && (confirmedAssignment !== null || confirmedAssignment === 'false')) {
-                console.log('inside', (assignmentId === null || assignmentId) );
-                return;
+            if((assignmentId !== null || assignmentId) && (confirmedAssignment !== null || confirmedAssignment === 'true')){
+                clearInterval(this.state.interval);
+                this.props.navigation.navigate('Navigator');
             }
+
+            // if ((assignmentId !== null || assignmentId) && (confirmedAssignment !== null || confirmedAssignment === 'false')) {
+            //     console.log('inside', (assignmentId === null || assignmentId) );
+            //     return;
+            // }
             const response = await assigment.startGetAssignments();
             console.log('response assignment ', response);
             if (typeof response.assignment !== 'undefined') {

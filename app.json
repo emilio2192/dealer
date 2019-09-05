@@ -30,6 +30,10 @@
         "UIBackgroundModes": [
           "location",
           "fetch"
+        ],
+        "LSApplicationQueriesSchemes": [
+          "waze",
+          "comgooglemaps"
         ]
       }
     }
