@@ -150,6 +150,33 @@ const confirm = async (status) => {
     return response;
 };
 
+const endLocation = async (locations) =>{
+    const newLocations = locations.map(item => {
+        let newItem = item;
+        delete newItem.active;
+        return newItem
+    })
+    const assignmentId = await AsyncStorage.getItem('assignment');
+    const data = {
+        assignmentId: assignmentId,
+        locations: newLocations
+    };
+    const response = await gateway(endpoints.endPointLocation, 'POST', data);
+    return response;
+};
+const finishAssignment = async () => {
+    const assignmentId = await AsyncStorage.getItem('assignment');
+    const data = {
+        assignmentId
+    }
+    const response = await gateway(endpoints.finishAssignment, 'POST', data);
+    if(response){
+        await AsyncStorage.removeItem('assignment');
+        await AsyncStorage.removeItem('confirmedAssignment');
+    }
+    return response;
+}
+
 export default {
     // sendUpdateLocation,
     startGetAssignments,
@@ -158,5 +185,7 @@ export default {
     disconnectMessenger,
     getMessengerAssignment,
     getHistoryAssignments,
-    confirm
+    confirm,
+    endLocation,
+    finishAssignment
 }

@@ -16,4 +16,6 @@ export default {
     historyAssignment: '/assignment/messenger',
     confirmAssignment: '/assignment/confirm-messenger',
     GetAssignement: (id) => `/assignment/${id}`,
+    endPointLocation: '/assignment/update-locations',
+    finishAssignment: '/assignment/finish'
 }

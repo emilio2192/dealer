@@ -14,6 +14,8 @@ import { getDistance } from 'geolib';
 import Endpoints from '../constants/Endpoints';
 import { gateway } from '../services/gateway';
 
+import assignment from '../services/Assignments';
+
 import location from '../services/Location';
 
 let savedRegion;
@@ -55,15 +57,31 @@ export default class NavigatorScreen extends React.Component {
     };
 
     async componentDidMount() {
-        // const assignmentId = await AsyncStorage.getItem('assignment');
-        const assignmentId = 'x_lTRmuZF';
+        const assignmentId = await AsyncStorage.getItem('assignment');
+        // const assignmentId = 'x_lTRmuZF';
         console.log('ID ASSIGNMENT' + assignmentId);
         console.log('URL ------', Endpoints.GetAssignement(assignmentId));
         const response = await gateway(Endpoints.GetAssignement(assignmentId), 'GET');
         console.log('RESPONSE' , response);
         let item = response.Assignment;
-        item.locations[0].active = true;
+        item.locations = await item.locations.map(item => {
+            let newItem = item;
+            newItem['active'] = false;
+            return newItem;
+        });
+
+        console.log('=============', item.locations);
+        for(let i = 0; i < item.locations.length; i++){
+            if(item.locations[i].status==="1"){
+                item.locations[i]['active'] = true;
+                i = item.locations.length;
+
+            }
+        }
+
+        console.log('IIIIIITEEEEEEM', item);
         this.setState({ item });
+        this.forceUpdate();
         console.log('ITEM ' + this.state.item);
         /*this.getInitialState();
         globalInterval = setInterval(() => {
@@ -124,13 +142,18 @@ export default class NavigatorScreen extends React.Component {
         const locations = this.state.item.locations;
         const actualPoint = this.state.item.locations.find((element) => { return element.active });
         const actualCoor = { latitude: actualPoint.lat, longitude: actualPoint.lng }
-        if (getDistance(this.state.origin, actualCoor) <= FINISH_DISTANCE) {
+        if (getDistance(this.state.origin, actualCoor) <= FINISH_DISTANCE || true) {
             const index = locations.findIndex((element) => { return element.active });
             if (index !== locations.length - 1) {
                 locations[index].active = false;
+                locations[index].status = 2;
+                const responseFinish = assigment.endLocation(locations);
+                console.log('FINALIZACION DE PUNTO ',responseFinish);
                 locations[index + 1].active = true;
                 this.setState({ item: { locations } });
             } else if (index === locations.length - 1) {
+                const responseFinish = assigment.finishAssignment();
+                console.log('FINALIZACION DE ASIGNACION ', responseFinish);
                 clearInterval(globalInterval);
                 this.props.navigation.navigate('Main');
             }
@@ -150,7 +173,11 @@ export default class NavigatorScreen extends React.Component {
         let width = Dimensions.get('window').width;
         const height = 400;
         let { item } = this.state;
-        let activeElement = item.locations && item.locations.find((element) => { return element.active });
+        let activeElement = item.locations && item.locations.find((element) => {
+
+            return typeof element.active !== "undefined" &&  element.active
+        });
+        console.log('active element ', activeElement);
         return (
             <ScrollView style={[styles.container]}>
                 {item.locations && <MapView

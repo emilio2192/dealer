@@ -70,14 +70,16 @@ export default class HomeScreen extends React.Component {
             if((assignmentId !== null || assignmentId) && (confirmedAssignment !== null || confirmedAssignment === 'true')){
                 clearInterval(this.state.interval);
                 this.props.navigation.navigate('Navigator');
+                return ;
             }
 
             // if ((assignmentId !== null || assignmentId) && (confirmedAssignment !== null || confirmedAssignment === 'false')) {
             //     console.log('inside', (assignmentId === null || assignmentId) );
             //     return;
             // }
+
             const response = await assigment.startGetAssignments();
-            console.log('response assignment ', response);
+            console.log('response assignment =======>', response);
             if (typeof response.assignment !== 'undefined') {
                 console.log('inside of if' + typeof response.assignment);
                 console.log('************** assignmentID  ---      ', response.assignment.assignmentID);
