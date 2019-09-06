@@ -21,6 +21,7 @@ import endpoints from '../../constants/Endpoints';
 import communStyles from '../../constants/CommunStyles';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ScreenHeader } from "../../components/ScreenHeader";
+import { KeyboardAvoidingView } from 'react-native';
 
 export class RegisterScreen extends React.Component {
     static navigationOptions = {
@@ -48,7 +49,7 @@ export class RegisterScreen extends React.Component {
 
     createNewUser = async () => {
         try {
-            if(!this.state.data.agreed){
+            if (!this.state.data.agreed) {
                 alert('Por favor aceptar términos y condiciones para proceder');
                 return;
             }
@@ -79,74 +80,95 @@ export class RegisterScreen extends React.Component {
         </View>
     }
 
+    _scrollToInput(reactNode) {
+        // Add a 'scroll' ref to your ScrollView
+        this.scroll.props.scrollToFocusedInput(reactNode)
+    }
+
     render() {
         return (
-            <View style={{ flex: 1 }}>
-                <ScreenHeader customStyle={{ backgroundColor: '#F4F4F4' }} title="Registro" navigation={this.props.navigation} />
-                <SafeAreaView
-                    style={{ flex: 1, backgroundColor: '#F4F4F4' }}
-                    forceInset={{ top: 'never' }}>
-                    <KeyboardAwareScrollView
-                        innerRef={ref => {
-                            this.scroll = ref
-                        }}
-                        resetScrollToCoords={{ x: 0, y: 0 }}
-                        contentContainerStyle={styles.container}
-                        scrollEnabled={false}>
-                            <Modal
-                                animationType="slide"
-                                transparent={false}
-                                visible={this.state.modal}
-                                onRequestClose={() => console.log('Modal closed')}>
-                                <View style={styles.container}>
-                                    <View style={styles.closeModal}>
-                                        <AntDesign name="close" color="black" size={30} onPress={() => { this.setState({ modal: !this.state.modal }) }} />
-                                    </View>
-                                    <ScrollView style={styles.modalContainer}>
-                                        <Terms />
-                                    </ScrollView>
+            <SafeAreaView
+                style={{ flex: 1, backgroundColor: 'white' }}
+                forceInset={{ top: 'never' }}>
+                <ScreenHeader title="Registro" navigation={this.props.navigation} />
+                <KeyboardAwareScrollView
+                    innerRef={ref => {
+                        this.scroll = ref
+                    }}
+                    resetScrollToCoords={{ x: 0, y: 0 }}
+                    contentContainerStyle={styles.container}
+                    scrollEnabled={true}>
+                    <KeyboardAvoidingView style={styles.formContainer} 
+                        behavior="padding"
+                        enabled
+                        keyboardVerticalOffset={100}>
+                        <Modal
+                            animationType="slide"
+                            transparent={false}
+                            visible={this.state.modal}
+                            onRequestClose={() => console.log('Modal closed')}>
+                            <View style={styles.container}>
+                                <View style={styles.closeModal}>
+                                    <AntDesign name="close" color="black" size={30} onPress={() => { this.setState({ modal: !this.state.modal }) }} />
                                 </View>
-                            </Modal>
-                            <ScrollView style={styles.formContainer} contentContainerStyle={{alignItems: 'center', paddingBottom: 36}}>
-                                <Text style={styles.textInput}>Nombre:</Text>
-                                <TextInput
-                                    onChangeText={(text) => this.setState({ data: { ...this.state.data, name: text } })}
-                                    style={styles.inputStyle}
-                                    textContentType='name' />
-                                <Text style={styles.textInput}>Telefono:</Text>
-                                <TextInput
-                                    onChangeText={(text) => this.setState({ data: { ...this.state.data, mobile: text } })}
-                                    style={styles.inputStyle}
-                                    textContentType='telephoneNumber' />
-                                <Text style={styles.textInput}>Correo:</Text>
-                                <TextInput
-                                    onChangeText={(text) => this.setState({ data: { ...this.state.data, email: text } })}
-                                    style={styles.inputStyle}
-                                    keyboardType='email-address' />
-                                <Text style={styles.textInput}>Contraseña:</Text>
-                                <TextInput
-                                    secureTextEntry={true}
-                                    onChangeText={(text) => this.setState({ data: { ...this.state.data, password: text } })}
-                                    style={[styles.inputStyle]}
-                                    textContentType='password' />
-                                <Text style={styles.textInput}>Confirmar contraseña:</Text>
-                                <TextInput
-                                    secureTextEntry={true}
-                                    onChangeText={(text) => this.setState({ data: { ...this.state.data, passwordConfirm: text } })}
-                                    style={styles.inputStyle}
-                                    textContentType='password' />
-                                <View style={styles.row}>
-                                    {this.checkBox()}
-                                </View>
-                                <TouchableOpacity
-                                    style={[communStyles.btnPrincipal, { width: Dimensions.get('window').width - 96 }]}
-                                    onPress={() => this.createNewUser()}>
-                                    <Text style={{ color: 'white', fontFamily: 'roboto-bold' }}>REGISTRARSE</Text>
-                                </TouchableOpacity>
-                            </ScrollView>
-                    </KeyboardAwareScrollView>
-                </SafeAreaView>
-            </View>
+                                <ScrollView style={styles.modalContainer}>
+                                    <Terms />
+                                </ScrollView>
+                            </View>
+                        </Modal>
+                        <Text style={styles.textInput}>Nombre:</Text>
+                        <TextInput
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, name: text } })}
+                            style={styles.inputStyle}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
+                            textContentType='name' />
+                        <Text style={styles.textInput}>Telefono:</Text>
+                        <TextInput
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, mobile: text } })}
+                            style={styles.inputStyle}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
+                            textContentType='telephoneNumber' />
+                        <Text style={styles.textInput}>Correo:</Text>
+                        <TextInput
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, email: text } })}
+                            style={styles.inputStyle}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
+                            keyboardType='email-address' />
+                        <Text style={styles.textInput}>Contraseña:</Text>
+                        <TextInput
+                            secureTextEntry={true}
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, password: text } })}
+                            style={[styles.inputStyle]}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
+                            textContentType='password' />
+                        <Text style={styles.textInput}>Confirmar contraseña:</Text>
+                        <TextInput
+                            secureTextEntry={true}
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, passwordConfirm: text } })}
+                            style={styles.inputStyle}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
+                            textContentType='password' />
+                        <View style={styles.row}>
+                            {this.checkBox()}
+                        </View>
+                        <TouchableOpacity
+                            style={[communStyles.btnPrincipal, { width: Dimensions.get('window').width - 96 }]}
+                            onPress={() => this.createNewUser()}>
+                            <Text style={{ color: 'white', fontFamily: 'roboto-bold' }}>REGISTRARSE</Text>
+                        </TouchableOpacity>
+                    </KeyboardAvoidingView>
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
         )
     }
 }
@@ -158,7 +180,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: 'column',
-        backgroundColor: '#F4F4F4'
+        backgroundColor: 'white',
+        zIndex: 11
     },
     textInput: {
         fontSize: 12,
@@ -170,8 +193,6 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start'
     },
     formContainer: {
-        flex: 1,
-        backgroundColor: 'white',
         paddingHorizontal: 24,
         paddingVertical: 24,
         paddingBottom: 50,

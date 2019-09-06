@@ -157,6 +157,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 50,
+        marginBottom: 20,
         flexDirection: 'row'
     },
     registerText: {
@@ -173,19 +174,17 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         paddingHorizontal: 24,
         bottom: 24,
-        position: 'absolute',
-        paddingVertical: 75,
+        paddingTop: 35,
         borderRadius: 35,
-        alignItems: 'center'
+        alignItems: 'center',
+        paddingBottom: 75
     },
     logo: {
-        position: 'absolute',
         resizeMode: 'contain',
         width: 250,
         height: 100,
         alignItems: 'center',
-        marginBottom: 100,
-        top: -150
+        marginBottom: 50
     },
     rowLink: {
         height: 40,
