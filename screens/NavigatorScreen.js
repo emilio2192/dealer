@@ -1,25 +1,25 @@
 import * as React from 'react';
-import { Dimensions, Text, View, StyleSheet, ScrollView, Alert, AsyncStorage, Platform, Linking } from 'react-native';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import {Alert, AsyncStorage, Dimensions, Linking, Platform, ScrollView, StyleSheet, Text, View} from 'react-native';
 import assigment from '../services/Assignments';
-import MapView, { PROVIDER_GOOGLE, ProviderPropType, Marker, AnimatedRegion } from 'react-native-maps';
-import { getLocation } from '../services/location-service';
+import assignment from '../services/Assignments';
+import MapView, {AnimatedRegion, Marker, PROVIDER_GOOGLE, ProviderPropType} from 'react-native-maps';
+import {getLocation} from '../services/location-service';
 import GOOGLE from '../constants/Google';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MapViewDirections from 'react-native-maps-directions';
 import Colors from '../constants/Colors';
-import { LocationList } from '../components/LocationList';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { getDistance } from 'geolib';
+import {LocationList} from '../components/LocationList';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {getDistance} from 'geolib';
 import Endpoints from '../constants/Endpoints';
-import { gateway } from '../services/gateway';
+import {gateway} from '../services/gateway';
 
-import assignment from '../services/Assignments';
+import endpoints from '../constants/Endpoints';
 
-import location from '../services/Location';
+import constants from '../constants/Server';
 
 let savedRegion;
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 const LATITUDE = 14.521837;
 const LONGITUDE = -90.600022;
@@ -53,7 +53,8 @@ export default class NavigatorScreen extends React.Component {
             latitude: LATITUDE,
             longitude: LONGITUDE,
         },
-        item: {}
+        item: {},
+        interval:null
     };
 
     async componentDidMount() {
@@ -62,7 +63,7 @@ export default class NavigatorScreen extends React.Component {
         console.log('ID ASSIGNMENT' + assignmentId);
         console.log('URL ------', Endpoints.GetAssignement(assignmentId));
         const response = await gateway(Endpoints.GetAssignement(assignmentId), 'GET');
-        console.log('RESPONSE' , response);
+        console.log('RESPONSE', response);
         let item = response.Assignment;
         item.locations = await item.locations.map(item => {
             let newItem = item;
@@ -71,8 +72,8 @@ export default class NavigatorScreen extends React.Component {
         });
 
         console.log('=============', item.locations);
-        for(let i = 0; i < item.locations.length; i++){
-            if(item.locations[i].status==="1"){
+        for (let i = 0; i < item.locations.length; i++) {
+            if (item.locations[i].status === "1") {
                 item.locations[i]['active'] = true;
                 i = item.locations.length;
 
@@ -80,7 +81,7 @@ export default class NavigatorScreen extends React.Component {
         }
 
         console.log('IIIIIITEEEEEEM', item);
-        this.setState({ item });
+        this.setState({item});
         this.forceUpdate();
         console.log('ITEM ' + this.state.item);
         /*this.getInitialState();
@@ -88,27 +89,35 @@ export default class NavigatorScreen extends React.Component {
             this.getInitialState();
         }, 5000);*/
 
-        if(Platform.OS === 'ios'){
-            this.getInitialState()
+        if (Platform.OS === 'ios') {
+            const interval = setInterval(()=>{
+                this.getInitialState()
+            }, 1000 * 5)
+            this.setState({interval});
         }
     }
 
     getInitialState() {
-        getLocation().then(data => {
+        getLocation().then(async (data) => {
             // this.updateState({
             //     latitude: data.latitude,
             //     longitude: data.longitude,
             // });
             // this.animate(data.latitude, data.longitude);
-            // const dataSend = {
-//             assignmentId: user.id
-//             newLocation: `${data.latitude},${data.longitude}`
-//         };
-//         fetch(endpoints.changeMessengerLocationAssigment, {
-//             method: 'POST',
-//             headers: constants.headers,
-//             body: JSON.stringify(dataSend)
-//         });
+
+            console.log('locations', data);
+            let user = await AsyncStorage.getItem("userInformation");
+            user = JSON.parse(user);
+            const dataSend = {
+                assignmentId: user.id,
+                newLocation: `${data.latitude},${data.longitude}`
+            };
+            const response = fetch(endpoints.changeMessengerLocationAssigment, {
+                method: 'POST',
+                headers: constants.headers,
+                body: JSON.stringify(dataSend)
+            });
+            console.log('update ',response);
         });
     }
 
@@ -126,7 +135,7 @@ export default class NavigatorScreen extends React.Component {
     }
 
     animate(newLat, newLong) {
-        const { coordinate } = this.state;
+        const {coordinate} = this.state;
         const newCoordinate = {
             latitude: newLat,
             longitude: newLong,
@@ -140,18 +149,25 @@ export default class NavigatorScreen extends React.Component {
 
     async _finishAdress() {
         const locations = this.state.item.locations;
-        const actualPoint = this.state.item.locations.find((element) => { return element.active });
-        const actualCoor = { latitude: actualPoint.lat, longitude: actualPoint.lng }
+        const actualPoint = this.state.item.locations.find((element) => {
+            return element.active
+        });
+        const actualCoor = {latitude: actualPoint.lat, longitude: actualPoint.lng}
         if (getDistance(this.state.origin, actualCoor) <= FINISH_DISTANCE || true) {
-            const index = locations.findIndex((element) => { return element.active });
+            const index = locations.findIndex((element) => {
+                return element.active
+            });
             if (index !== locations.length - 1) {
                 locations[index].active = false;
                 locations[index].status = 2;
                 const responseFinish = assigment.endLocation(locations);
-                console.log('FINALIZACION DE PUNTO ',responseFinish);
+                console.log('FINALIZACION DE PUNTO ', responseFinish);
                 locations[index + 1].active = true;
-                this.setState({ item: { locations } });
+                this.setState({item: {locations}});
             } else if (index === locations.length - 1) {
+                locations[index].status = 2;
+                const responsePoint = assigment.endLocation(locations);
+                console.log('FINALIZACION DE PUNTO ', responsePoint);
                 const responseFinish = assigment.finishAssignment();
                 console.log('FINALIZACION DE ASIGNACION ', responseFinish);
                 clearInterval(globalInterval);
@@ -162,7 +178,7 @@ export default class NavigatorScreen extends React.Component {
                 'Distancia requerida',
                 `Sólo puedes finalizar un punto, cuando estés a ${FINISH_DISTANCE} metros de dicho punto.`,
                 [
-                  {text: 'OK', onPress: () => console.log('OK Pressed')},
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
                 ],
                 {cancelable: false},
             );
@@ -172,10 +188,10 @@ export default class NavigatorScreen extends React.Component {
     render() {
         let width = Dimensions.get('window').width;
         const height = 400;
-        let { item } = this.state;
+        let {item} = this.state;
         let activeElement = item.locations && item.locations.find((element) => {
 
-            return typeof element.active !== "undefined" &&  element.active
+            return typeof element.active !== "undefined" && element.active
         });
         console.log('active element ', activeElement);
         return (
@@ -183,17 +199,19 @@ export default class NavigatorScreen extends React.Component {
                 {item.locations && <MapView
                     provider={PROVIDER_GOOGLE}
                     customMapStyle={GOOGLE.MinimalMap}
-                    style={{ width: width, height: height }}
+                    style={{width: width, height: height}}
                     region={{...this.state.region, latitudeDelta: LATITUDE_DELTA, longitudeDelta: LONGITUDE_DELTA}}
                     ref={c => this.mapView = c}>
                     <Marker.Animated
                         coordinate={this.state.origin}
-                        ref={marker => { this.marker = marker; }}>
-                        <MaterialIcons name="person-pin-circle" size={44} color={Colors.YELLOW} />
+                        ref={marker => {
+                            this.marker = marker;
+                        }}>
+                        <MaterialIcons name="person-pin-circle" size={44} color={Colors.YELLOW}/>
                     </Marker.Animated>
                     <Marker
                         coordinate={{latitude: +activeElement.lat, longitude: +activeElement.lng}}>
-                        <MaterialIcons name="location-on" size={44} color={Colors.YELLOW} />
+                        <MaterialIcons name="location-on" size={44} color={Colors.YELLOW}/>
                     </Marker>
                     <MapViewDirections
                         origin={this.state.origin}
@@ -205,9 +223,14 @@ export default class NavigatorScreen extends React.Component {
                     />
                 </MapView>}
                 {item.locations && <View style={styles.orderDetails}>
-                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 20 }}>Dirección: {activeElement.address}</Text>
-                    <Text style={{ fontWeight: 'bold', color: Colors.DARK, fontSize: 14 }}>Pago en efectivo: {activeElement.servicePayment ? 'Sí' : 'No'}</Text>
-                    <View style={{ paddingTop: 20 }}>
+                    <Text style={{
+                        fontWeight: 'bold',
+                        color: Colors.DARK,
+                        fontSize: 20
+                    }}>Dirección: {activeElement.address}</Text>
+                    <Text style={{fontWeight: 'bold', color: Colors.DARK, fontSize: 14}}>Pago en
+                        efectivo: {activeElement.servicePayment ? 'Sí' : 'No'}</Text>
+                    <View style={{paddingTop: 20}}>
                         {
                             item.locations.map((location, index) => (
                                 <LocationList
@@ -222,15 +245,15 @@ export default class NavigatorScreen extends React.Component {
                     <TouchableOpacity
                         style={styles.blueButton}
                         onPress={() => Linking.openURL(`https://www.waze.com/ul?ll=${activeElement.lat}%2C${activeElement.lng}&navigate=yes&zoom=17`)}>
-                        <Text style={{ color: '#38c0e0', fontWeight: 'bold' }}>IR A WAZE</Text>
+                        <Text style={{color: '#38c0e0', fontWeight: 'bold'}}>IR A WAZE</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.completeButton}
                         onPress={() => this._finishAdress()}>
-                        <Text style={{ color: '#f43535', fontWeight: 'bold' }}>FINALIZAR PUNTO</Text>
+                        <Text style={{color: '#f43535', fontWeight: 'bold'}}>FINALIZAR PUNTO</Text>
                     </TouchableOpacity>
                 </View>}
-            </ScrollView >
+            </ScrollView>
         );
     }
 }
@@ -249,7 +272,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         shadowColor: '#727272',
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.8,
         shadowRadius: 5,
         elevation: 15,
@@ -273,7 +296,7 @@ const styles = StyleSheet.create({
         marginTop: 20
     },
     blueButton: {
-    alignItems: 'center',
+        alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'white',
         borderWidth: 2,
@@ -285,6 +308,6 @@ const styles = StyleSheet.create({
         zIndex: 10,
         fontFamily: 'roboto-bold',
         marginTop: 20
-}
+    }
 });
 

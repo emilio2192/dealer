@@ -25,33 +25,33 @@ const ASSIGNMENT_TASK_NAME = 'background-get-assignment';
 //     }
 // }
 BackgroundFetch.setMinimumIntervalAsync(1);
-// TaskManager.defineTask(LOCATION_TASK_NAME,  async ({ data, error }) => {
-//     if (error) {
-//         // Error occurred - check `error.message` for more details.
-//         return;
-//     }
-//     if (data) {
-//         const { locations } = data;
-//         let user = await AsyncStorage.getItem("userInformation");
-//         user = JSON.parse(user);
-//         const dataSend = {
-//             assignmentId: user.id
-//             newLocation: `${locations[0].coords.latitude},${locations[0].coords.longitude}`
-//         };
-//         fetch(endpoints.changeMessengerLocationAssigment, {
-//             method: 'POST',
-//             headers: constants.headers,
-//             body: JSON.stringify(dataSend)
-//         });
-//         const onAssigment = await AsyncStorage.getItem('assigmentId');
-//         if(onAssigment.length > 0){
-//              const response = gateway(endpoints.changeMessengerLocationAssigment, 'POST', dataSent);
-//         }
-//         console.log('send');
-//
-//         // do something with the locations captured in the background
-//     }
-// });
+TaskManager.defineTask(LOCATION_TASK_NAME,  async ({ data, error }) => {
+    if (error) {
+        // Error occurred - check `error.message` for more details.
+        return;
+    }
+    if (data) {
+        const { locations } = data;
+        let user = await AsyncStorage.getItem("userInformation");
+        user = JSON.parse(user);
+        const dataSend = {
+            assignmentId: user.id,
+            newLocation: `${locations[0].coords.latitude},${locations[0].coords.longitude}`
+        };
+        fetch(endpoints.changeMessengerLocationAssigment, {
+            method: 'POST',
+            headers: constants.headers,
+            body: JSON.stringify(dataSend)
+        });
+        const onAssigment = await AsyncStorage.getItem('assigmentId');
+        if(onAssigment.length > 0){
+             const response = gateway(endpoints.changeMessengerLocationAssigment, 'POST', dataSent);
+        }
+        console.log('send');
+
+        // do something with the locations captured in the background
+    }
+});
 
 
 export default {

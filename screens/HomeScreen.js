@@ -18,6 +18,7 @@ export default class HomeScreen extends React.Component {
 
     async componentDidMount() {
         const userStatus = await AsyncStorage.getItem('userStatus');
+
         if (userStatus === null) {
             await AsyncStorage.setItem('userStatus', 'false');
             this.setState({userStatus: 'false'});
@@ -26,6 +27,8 @@ export default class HomeScreen extends React.Component {
             this.stopAssignment();
         } else {
             await AsyncStorage.setItem('userStatus', 'true');
+            clearInterval(this.state.interval);
+            this.setState({interval:null});
             this.startGetAssignments();
         }
         this.setState({userStatus});
