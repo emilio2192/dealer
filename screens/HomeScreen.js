@@ -93,6 +93,7 @@ export default class HomeScreen extends React.Component {
     };
 
     confirmedAlert = async (assignmentId) => {
+        clearInterval(this.state.interval);
         console.log('INSIDE CONFIRM ALERT ');
         const message = 'Desea realizar asignación?';
         const choice = await AlertAsync(
@@ -113,6 +114,7 @@ export default class HomeScreen extends React.Component {
             // send to screen
             this.props.navigation.navigate('Navigator');
         }else{
+            this.startGetAssignments();
             await AsyncStorage.setItem('confirmedAssignment', 'false');
             await AsyncStorage.removeItem('assignment');
         }

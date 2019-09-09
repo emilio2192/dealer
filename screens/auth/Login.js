@@ -46,7 +46,8 @@ export class LoginScreen extends React.Component {
             console.log('LOGIN ',response);
             const responseJson = await response.json();
             console.log('LOGIN ',responseJson);
-            if (response.status === 401 && response.ok === false && body.verified === false) {
+            const verified = responseJson.verified;
+            if (response.status === 401 && response.ok === false && verified === false) {
                 this.props.navigation.navigate('Verify');
                 return;
             }
