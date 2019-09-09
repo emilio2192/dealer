@@ -12,9 +12,8 @@ import {LocationList} from '../components/LocationList';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {getDistance} from 'geolib';
 import Endpoints from '../constants/Endpoints';
-import {gateway} from '../services/gateway';
-
 import endpoints from '../constants/Endpoints';
+import {gateway} from '../services/gateway';
 
 import constants from '../constants/Server';
 
@@ -54,7 +53,7 @@ export default class NavigatorScreen extends React.Component {
             longitude: LONGITUDE,
         },
         item: {},
-        interval:null
+        interval: null
     };
 
     async componentDidMount() {
@@ -65,6 +64,7 @@ export default class NavigatorScreen extends React.Component {
         const response = await gateway(Endpoints.GetAssignement(assignmentId), 'GET');
         console.log('RESPONSE', response);
         let item = response.Assignment;
+
         item.locations = await item.locations.map(item => {
             let newItem = item;
             newItem['active'] = false;
@@ -88,6 +88,14 @@ export default class NavigatorScreen extends React.Component {
         globalInterval = setInterval(() => {
             this.getInitialState();
         }, 5000);*/
+
+        getLocation().then(async (data) => {
+            this.updateState({
+                latitude: data.latitude,
+                longitude: data.longitude,
+            });
+            this.animate(data.latitude, data.longitude);
+        });
 
         if (Platform.OS === 'ios') {
             const interval = setInterval(()=>{
@@ -117,7 +125,7 @@ export default class NavigatorScreen extends React.Component {
                 headers: constants.headers,
                 body: JSON.stringify(dataSend)
             });
-            console.log('update ',response);
+            console.log('update ', response);
         });
     }
 
@@ -199,7 +207,23 @@ export default class NavigatorScreen extends React.Component {
                 {item.locations && <MapView
                     provider={PROVIDER_GOOGLE}
                     customMapStyle={GOOGLE.MinimalMap}
-                    style={{width: width, height: height}}
+                    initialRegion={{
+                        latitude: +activeElement.lat,
+                        longitude: +activeElement.lng,
+                        latitudeDelta: LATITUDE_DELTA,
+                        longitudeDelta: LONGITUDE_DELTA,
+                    }}
+                    zIndex={999}
+                    style={{
+                        width: width,
+                        height: height,
+                        position: 'relative',
+                        zIndex: 99,
+                        bottom: 0,
+                        top: 0,
+                        left: 0,
+                        right: 0
+                    }}
                     region={{...this.state.region, latitudeDelta: LATITUDE_DELTA, longitudeDelta: LONGITUDE_DELTA}}
                     ref={c => this.mapView = c}>
                     <Marker.Animated
@@ -277,7 +301,7 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         elevation: 15,
         backgroundColor: 'white',
-        top: -50,
+        top: -40,
         paddingTop: 40,
         marginBottom: -50
     },
