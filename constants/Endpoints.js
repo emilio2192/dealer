@@ -17,5 +17,6 @@ export default {
     confirmAssignment: '/assignment/confirm-messenger',
     GetAssignement: (id) => `/assignment/${id}`,
     endPointLocation: '/assignment/update-locations',
-    finishAssignment: '/assignment/finish'
+    finishAssignment: '/assignment/finish',
+    summary: '/user/messenger/summary'
 }

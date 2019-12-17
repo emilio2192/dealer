@@ -3,6 +3,7 @@ import * as BackgroundFetch from 'expo-background-fetch';
 import {AsyncStorage} from "react-native";
 import endpoints from '../constants/Endpoints';
 import {gateway} from '../services/gateway';
+import SERVER from "../constants/Server";
 
 
 const LOCATION_TASK_NAME = 'background-location-task';
@@ -135,10 +136,10 @@ const getHistoryAssignments = async () => {
     return response;
 };
 
-const confirm = async (status) => {
+const confirm = async (status, assignmentId) => {
     let user = await AsyncStorage.getItem("userInformation");
     user = JSON.parse(user);
-    const assignmentId = await AsyncStorage.getItem('assignment');
+
     const data = {
         messengerId: user.id,
         assignmentID: assignmentId,
@@ -150,7 +151,7 @@ const confirm = async (status) => {
     return response;
 };
 
-const endLocation = async (locations) =>{
+const endLocation = async (locations) => {
     const newLocations = locations.map(item => {
         let newItem = item;
         delete newItem.active;
@@ -170,11 +171,29 @@ const finishAssignment = async () => {
         assignmentId
     }
     const response = await gateway(endpoints.finishAssignment, 'POST', data);
-    if(response){
+    if (response) {
         await AsyncStorage.removeItem('assignment');
         await AsyncStorage.removeItem('confirmedAssignment');
     }
     return response;
+}
+
+const summary = async (userId) => {
+    try{
+        let headers = SERVER.headers;
+        let token = 'Bearer ' + await AsyncStorage.getItem('token');
+        token = token.replace(/['"]+/g, '');
+        headers['Authorization'] = token;
+        const response = await fetch(SERVER.domain + endpoints.summary, {
+            method:'GET',
+            headers
+        });
+        return response.json();
+    }catch (e) {
+        console.error(e);
+        return Promise.reject(e);
+    }
+
 }
 
 export default {
@@ -187,5 +206,6 @@ export default {
     getHistoryAssignments,
     confirm,
     endLocation,
-    finishAssignment
+    finishAssignment,
+    summary
 }

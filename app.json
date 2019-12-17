@@ -27,6 +27,9 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationAlwaysUsageDescription": "Is necesary to work",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        },
         "UIBackgroundModes": [
           "location",
           "fetch"
@@ -36,6 +39,7 @@
           "comgooglemaps"
         ]
       }
-    }
+    },
+    "description": ""
   }
 }
