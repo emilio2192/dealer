@@ -9,6 +9,8 @@ import {getLocation} from '../services/location-service';
 import * as geolib from 'geolib';
 import LottieView from "lottie-react-native";
 import {TouchableOpacity} from "react-native-gesture-handler";
+import * as Font from "expo-font";
+
 // import Image from "react-native-web/dist/exports/Image";
 
 export default class HomeScreen extends React.Component {
@@ -29,19 +31,23 @@ export default class HomeScreen extends React.Component {
     };
 
     async componentDidMount() {
-        await  AsyncStorage.clear();
+        // await Font.loadAsync({
+        //     'roboto-bold': require('../assets/fonts/Roboto/Roboto-Bold.ttf'),
+        //     'roboto-black': require('../assets/fonts/Roboto/Roboto-Black.ttf'),
+        //     Roboto: require('../assets/fonts/Roboto/Roboto-Regular.ttf'),
+        //     'roboto-thin': require('../assets/fonts/Roboto/Roboto-Thin.ttf'),
+        //     'roboto-light': require('../assets/fonts/Roboto/Roboto-Light.ttf'),
+        //     'roboto-semibold': require('../assets/fonts/Roboto/Roboto-Medium.ttf'),
+        //     'bebas': require('../assets/fonts/bebas_neue/BebasNeue-Regular.ttf'),
+        // });
+        // // xs
+
         await AsyncStorage.setItem('userStatus', 'false');
         this.setState({userStatus: 'false'});
-        this.props.navigation.navigate('Login');
-        return;
         const userStatus = await AsyncStorage.getItem('userStatus');
         const user = await AsyncStorage.getItem('userInformation');
         const summary = await assigment.summary(user.id);
-        console.log('====== SUMMARY =========>', summary);
         this.setState({user: JSON.parse(user), summary:summary.summaryMonth});
-
-
-
         if (userStatus === null) {
             await AsyncStorage.setItem('userStatus', 'false');
             this.setState({userStatus: 'false'});
@@ -316,7 +322,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignSelf: 'stretch',
         zIndex: 10,
-        fontFamily: 'roboto-bold',
+        fontFamily: 'Roboto-Bold',
         marginTop: 20
     },
     blueButton: {
@@ -330,7 +336,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignSelf: 'stretch',
         zIndex: 10,
-        fontFamily: 'roboto-bold',
+        fontFamily: 'Roboto-Bold',
         marginTop: 20
     }
 });

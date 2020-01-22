@@ -5,10 +5,12 @@ import constants from '../../constants/Server';
 import endpoints from '../../constants/Endpoints';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {SafeAreaView} from 'react-navigation';
-import assigment from '../../services/Assignments';
+
 import {KeyboardAvoidingView} from 'react-native';
 
+
 import LottieView from "lottie-react-native";
+
 
 // const { Lottie } = DangerZone;
 
@@ -29,7 +31,18 @@ export class LoginScreen extends React.Component {
         };
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        console.log('login');
+        // await Font.loadAsync({
+        //
+        //     'roboto-bold': require('../../assets/fonts/Roboto/Roboto-Bold.ttf'),
+        //     'roboto-black': require('../../assets/fonts/Roboto/Roboto-Black.ttf'),
+        //     'roboto': require('../../assets/fonts/Roboto/Roboto-Regular.ttf'),
+        //     'roboto-thin': require('../../assets/fonts/Roboto/Roboto-Thin.ttf'),
+        //     'roboto-light': require('../../assets/fonts/Roboto/Roboto-Light.ttf'),
+        //     'roboto-semibold': require('../../assets/fonts/Roboto/Roboto-Medium.ttf'),
+        //     'bebas': require('../../assets/fonts/bebas_neue/BebasNeue-Regular.ttf')
+        // });
     }
 
     login = async () => {
@@ -58,6 +71,7 @@ export class LoginScreen extends React.Component {
                 this.props.navigation.navigate('Main');
             } else {
                 alert(body.msg);
+                console.log(responseJson);
             }
             this.setState({sending: false});
         } catch (e) {

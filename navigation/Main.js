@@ -2,7 +2,7 @@ import React from 'react';
 import {createBottomTabNavigator, createStackNavigator, TabBarBottom} from 'react-navigation';
 import HomeScreen from '../screens/HomeScreen';
 import Colors from '../constants/Colors';
-import Entypo from '@expo/vector-icons/Entypo';
+import {Entypo} from '@expo/vector-icons';
 import History from '../screens/history';
 import {ProfileScreen} from "../screens/profile";
 import NavigatorScreen from '../screens/NavigatorScreen';
@@ -55,7 +55,7 @@ const RootStack = createBottomTabNavigator(
         Home: {
             screen: HomeStack,
             navigationOptions: ({navigation}) => ({
-                tabBarIcon: ({focused, tintColor}) => {
+                tabBarIcon: ({ focused, horizontal, tintColor }) => {
                     return <Entypo name="home" size={30} color={tintColor}/>;
                 },
             })
@@ -63,7 +63,7 @@ const RootStack = createBottomTabNavigator(
         History: {
             screen: History,
             navigationOptions: ({navigation}) => ({
-                tabBarIcon: ({focused, tintColor}) => {
+                tabBarIcon: ({ focused, horizontal, tintColor }) => {
                     return <Entypo name="text-document" size={30} color={tintColor}/>;
                 },
             })
@@ -71,7 +71,7 @@ const RootStack = createBottomTabNavigator(
         Profile: {
             screen: ProfileScreen,
             navigationOptions: ({navigation}) => ({
-                tabBarIcon: ({focused, tintColor}) => {
+                tabBarIcon: ({ focused, horizontal, tintColor }) => {
                     return <Entypo name="user" size={30} color={tintColor}/>;
                 },
             })
