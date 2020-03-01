@@ -165,6 +165,7 @@ export default class NavigatorScreen extends React.Component {
             const index = locations.findIndex((element) => {
                 return element.active
             });
+            console.log('INDEX POINT current', index);
             if (index !== locations.length - 1) {
                 locations[index].active = false;
                 locations[index].status = 2;
@@ -172,14 +173,18 @@ export default class NavigatorScreen extends React.Component {
                 console.log('FINALIZACION DE PUNTO ', responseFinish);
                 locations[index + 1].active = true;
                 this.setState({item: {locations}});
-            } else if (index === locations.length - 1) {
+                // ultimo punto
+            } else if (index == locations.length - 1) {
+                console.log("ultimo punto");
                 locations[index].status = 2;
                 const responsePoint = assigment.endLocation(locations);
                 console.log('FINALIZACION DE PUNTO ', responsePoint);
                 const responseFinish = assigment.finishAssignment();
                 console.log('FINALIZACION DE ASIGNACION ', responseFinish);
                 clearInterval(globalInterval);
-                this.props.navigation.navigate('Main');
+                await AsyncStorage.clearInterval("assignment");
+                await AsyncStorage.clearInterval("confirmedAssignment");
+                this.props.navigation.navigate('Home');
             }
         } else {
             Alert.alert(

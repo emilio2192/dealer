@@ -41,7 +41,7 @@ export default class HomeScreen extends React.Component {
         //     'bebas': require('../assets/fonts/bebas_neue/BebasNeue-Regular.ttf'),
         // });
         // // xs
-
+        
         await AsyncStorage.setItem('userStatus', 'false');
         this.setState({userStatus: 'false'});
         const userStatus = await AsyncStorage.getItem('userStatus');
