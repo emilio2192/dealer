@@ -32,8 +32,7 @@ export default class HomeScreen extends React.Component {
     };
 
     async componentDidMount() {
-        await AsyncStorage.setItem('userStatus', 'false');
-        this.setState({userStatus: 'false'});
+        
         const userStatus = await AsyncStorage.getItem('userStatus');
         const user = await AsyncStorage.getItem('userInformation');
         const summary = await assigment.summary(user.id);
@@ -55,7 +54,7 @@ export default class HomeScreen extends React.Component {
         this.setState({userStatus});
 
 
-        this.animation.play();
+        // this.animation.play();
     };
 
     displayIconStatus = () => {

@@ -126,6 +126,7 @@ const stopGetAssignments = () => {
 };
 
 const getHistoryAssignments = async () => {
+    console.log('inside function');
     let user = await AsyncStorage.getItem("userInformation");
     user = JSON.parse(user);
     const data = {

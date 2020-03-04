@@ -28,6 +28,7 @@
     "react-native-background-fetch": "^2.0.8",
     "react-native-background-task": "^0.2.1",
     "react-native-bottom-drawer": "^1.0.2",
+    "react-native-collapsible": "^1.5.1",
     "react-native-gesture-handler": "~1.5.0",
     "react-native-keyboard-aware-scroll-view": "^0.8.0",
     "react-native-map-link": "^2.4.5",

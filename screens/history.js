@@ -1,46 +1,97 @@
 import * as React from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {
+    ActivityIndicator,
+    AsyncStorage,
+    StatusBar,
+    StyleSheet,
+    View,
+    Text,
+    TouchableOpacity,
+    Image,
+    Dimensions,
+    RefreshControl
+} from 'react-native';
 import assigment from '../services/Assignments';
 import {ScrollView} from "react-native-gesture-handler";
+import { computeDestinationPoint } from 'geolib';
+import Status from '../constants/Status';
+import Colors from '../constants/Colors';
+import lodash from 'lodash';
+import moment from 'moment';
+import Collapsible from 'react-native-collapsible';
+// import Ionicons from '@expo/vector-icons/Ionicons';
+import {Ionicons, FontAwesome, EvilIcons, MaterialCommunityIcons, Entypo} from '@expo/vector-icons';
+import {LocationList} from '../components/LocationList';
+import {NavigationEvents} from 'react-navigation';
 
 export default class History extends React.Component {
+    state = {
+        assignments: [],
+        isCollapsed: [],
+        isLoading: true,
+        animation: null,
+        modalVisible: false,
+        refreshing: false,
+        statusCount: {
+            waiting: 0,
+            assigned: 0,
+            inProgress: 0,
+            finished: 0
+        }
+    };
+
     constructor(props) {
         super(props);
-        this.state = {
-            dataSource: [
-                {
-                    subject: 'Traer mis llaves',
-                    contactName: 'Emilio Reyes',
-                    paymentStatus: 'PAGADO',
-                    date: '2019-08-21T00:00:00.000Z'
-                },
-                {
-                    subject: 'Traer mis llaves 2',
-                    contactName: 'Emilio Reyes',
-                    paymentStatus: 'PENDIENTE',
-                    date: '2019-08-21T00:00:00.000Z'
-                },
-                {
-                    subject: 'Traer mis llaves',
-                    contactName: 'Emilio Reyes',
-                    paymentStatus: 'PAGADO',
-                    date: '2019-08-21T00:00:00.000Z'
-                },
-                {
-                    subject: 'Traer mis llaves 2',
-                    contactName: 'Emilio Reyes',
-                    paymentStatus: 'PENDIENTE',
-                    date: '2019-08-21T00:00:00.000Z'
-                }
-            ]
-        }
     }
 
     async componentDidMount() {
         console.log('in history');
-        const history = await assigment.getHistoryAssignments();
-        this.setState({dataSource: history.assignments});
-        console.log('response history', history);
+        await this.fetchAssignments();
+    }
+    async fetchAssignments() {
+        try {
+            console.log("start fetching..");
+            let user = await AsyncStorage.getItem('userInformation');
+            // const token = await AsyncStorage.getItem('token');
+            
+            user = JSON.parse(user);
+            console.log("user---->", user);
+            // const history = await assigment.getHistoryAssignments(user);
+            
+            const history = await assigment.getHistoryAssignments()
+            console.log("end fetching..");
+            const response = history.assignments;
+            
+            console.log(response);
+            this.setState({assignments: lodash.orderBy(response, ['date'], ['desc']), user: user});
+            const waiting = lodash.filter(response, function (o) {
+                return o.status === Status.WAITING
+            }).length;
+            const assigned = lodash.filter(response, function (o) {
+                return o.status === Status.ASSIGNED
+            }).length;
+            const inProgress = lodash.filter(response, function (o) {
+                return o.status === Status.IN_PROGRESS
+            }).length;
+            const finished = lodash.filter(response, function (o) {
+                return o.status === Status.FINISHED
+            }).length;
+            let isCollapsed = [];
+            for (let i = 0; i < response.length; i++) {
+                isCollapsed.push(true);
+            }
+            
+            this.setState({isCollapsed, isLoading: false, statusCount: {waiting, assigned, inProgress, finished}});
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    _onRefresh = () => {
+        this.setState({refreshing: true});
+        this.fetchAssignments().then(() => {
+            this.setState({refreshing: false});
+        });
     }
 
     cardRender = (data) => {
@@ -69,92 +120,177 @@ export default class History extends React.Component {
     }
 
     render() {
-
         return (
-            <View style={{
-                flex: 1,
-                flexDirection: 'column',
-                justifyContent: "center",
-                alignItems: "stretch",
-                paddingTop: 100
-            }}>
-                <View style={{paddingTop: 20, height: 100}}>
-                    <Text style={{fontSize: 30, textAlign: 'center'}}>Historial de Asignaciones</Text>
-                </View>
-                <View style={{
-                    flex: 1, flexDirection: 'column',
-                    justifyContent: "center",
-                    alignItems: "stretch"
-                }}>
-                    {/*<FlatList*/}
-                    {/*    data={this.state.dataSource}*/}
-                    {/*    renderItem={({item}) => this.cardRender(item)}*/}
-                    {/*/>*/}
-                    <ScrollView
-                        style={{flex: 1, marginTop: 30, paddingTop: 7, paddingHorizontal: 7, marginHorizontal: -7}}
-                        showsVerticalScrollIndicator={false}>
-                        <View style={style.plainCard} key={1}>
-                            <View style={style.cardStatus}>
-                                <View style={[
-                                    style.cardStatusAlt,
-                                    {backgroundColor: 'gray'}]}/>
-                            </View>
-                            <View style={style.cardDate}>
-                                <Text
-                                    style={style.dateText}>2019-01-01</Text>
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    alert('hola mundo');
-                                }}
-                                style={style.cardBody}>
-                                <Text style={style.cardTitle}>Ir por llaves</Text>
-                                <View style={style.cardItem}>
-                                    {/*<Ionicons name="ios-person" size={16} color="#595959"/>*/}
-                                    <Text style={style.itemDescription}>Emilio Reyes</Text>
-                                </View>
-                                <View style={style.cardItem}>
-                                    {/*<FontAwesome name="phone" size={16} color="#595959"/>*/}
-                                    <Text style={style.itemDescription}>4383-0022</Text>
-                                </View>
+            <View style={styles.container}>
+                <NavigationEvents onDidFocus={() => this.fetchAssignments()}/>
+                {this.state.assignments.length > 0 && <StatusBar barStyle="light-content"/>}
+                {this.state.assignments.length < 0 && <StatusBar barStyle="dark-content"/>}
+                {
+                    !this.state.isLoading && this.state.assignments.length > 0 &&
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Asignaciones</Text>
+                        <TouchableOpacity
+                            onPress={() => this.props.navigation.navigate('New')}>
+                            <Ionicons name='ios-add' size={35} color={Colors.WHITE} />
+                        </TouchableOpacity>
+                    </View>
+                }
+                {
+                    !this.state.isLoading && this.state.assignments.length > 0 &&
+                    <Image style={styles.headerBackground}
+                           source={require('../assets/images/header.png')}/>
+                }
+                {
+                    !this.state.isLoading && this.state.assignments.length > 0 &&
+                    <View style={styles.body}>
+                        <View style={styles.topBar}>
+                            <TouchableOpacity style={styles.indicator}>
+                                <Text style={styles.indicatorValue}>{this.state.assignments.length}</Text>
+                                <Text style={styles.indicatorText}>Creadas</Text>
+                                <View style={[styles.indicatorColor, {backgroundColor: Status.COLORS.ALL}]}></View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.indicator}>
+                                <Text style={styles.indicatorValue}>{this.state.statusCount.inProgress}</Text>
+                                <Text style={styles.indicatorText}>Activas</Text>
+                                <View style={[styles.indicatorColor, { backgroundColor: Colors.GREEN }]}></View>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.indicator}>
+                                <Text style={styles.indicatorValue}>{this.state.statusCount.finished}</Text>
+                                <Text style={styles.indicatorText}>Completas</Text>
+                                <View style={[styles.indicatorColor, { backgroundColor: Colors.CIAN }]}></View>
                             </TouchableOpacity>
                         </View>
-                    </ScrollView>
-                </View>
+                        <ScrollView
+                            style={{flex: 1, marginTop: 30, paddingTop: 7, paddingHorizontal: 7, marginHorizontal: -7}}
+                            showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={this.state.refreshing}
+                                    onRefresh={this._onRefresh}
+                                />
+                            }>
+                            {
+                                this.state.assignments.map((item, index) => (
+                                    <View style={styles.plainCard} key={index}>
+                                        <View style={styles.cardStatus}>
+                                            <View style={[
+                                                    styles.cardStatusAlt, 
+                                                    item.status === Status.ASSIGNED ? { backgroundColor: Status.COLORS.ALL } : 
+                                                    item.status === Status.IN_PROGRESS ? { backgroundColor: Colors.GREEN } :
+                                                    item.status === Status.FINISHED ? { backgroundColor: Colors.CIAN } : null
+                                                ]}
+                                            ></View>
+                                        </View>
+                                        <View style={styles.cardDate}>
+                                            <Text
+                                                style={styles.dateText}>{moment(item.date).format('DD-MM-YYYY')}</Text>
+                                        </View>
+                                        <TouchableOpacity
+                                            // onPress={() => this.props.navigation.navigate('PaymentScreen',
+                                            //     {
+                                            //         readonly: true,
+                                            //         locations: item.locations,
+                                            //         subject: item.subject,
+                                            //         active: true,
+                                            //         assignmentId: item.assignmentID,
+                                            //         price: item.price   
+                                            //     }
+                                            // )}
+                                            style={styles.cardBody}>
+                                            <Text style={styles.cardTitle}>{item.subject.subject}</Text>
+                                            <View style={styles.cardItem}>
+                                                <Ionicons name="ios-person" size={16} color="#595959"/>
+                                                <Text style={styles.itemDescription}>{item.subject.contactName}</Text>
+                                            </View>
+                                            
+                                            <View style={styles.cardItem}>
+                                                <MaterialCommunityIcons name="currency-btc" size={16} color="#595959"/>
+                                                <Text style={styles.itemDescription}>{"Tipo de pago: " + (item.paymentMethod === "cdcard"? "Tarjeta" : "Efectivo")}</Text>
+                                            </View>
+                                            <View style={styles.cardItem}>
+                                                <MaterialCommunityIcons name="cash" size={16} color="#595959"/>
+                                                <Text style={styles.itemDescription}>{"Pagada:"+(item.messengerPaid? "Si" : "No")}</Text>
+                                            </View>
+                                      
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                let isCollapsed = this.state.isCollapsed;
+                                                isCollapsed[index] = !isCollapsed[index];
+                                                this.setState({isCollapsed});
+                                            }}
+                                            style={styles.cardFooter}>
+                                            <Text style={styles.footerTitle}>{item.locations.length} destinos</Text>
+                                            <EvilIcons name="chevron-down" size={30} color="#595959"/>
+                                        </TouchableOpacity>
+                                        <Collapsible collapsed={this.state.isCollapsed[index]}>
+                                            <View style={{paddingBottom: 20}}>
+                                                {
+                                                    item.locations.map((location, index) => (
+                                                        <LocationList
+                                                            location={location}
+                                                            index={index}
+                                                            key={index}
+                                                        />
+                                                    ))
+                                                }
+                                            </View>
+                                        </Collapsible>
+                                    </View>
+                                ))
+                            }
+                        </ScrollView>
+                    </View>
+                }
+                {
+                    !this.state.isLoading && this.state.assignments.length === 0 &&
+                    <View
+                        style={[styles.body, {justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16,}]}>
+                        <Image
+                            source={require('../assets/images/assignement-placeholder.png')}
+                            style={{width: 120, height: 120, resizeMode: 'contain', marginBottom: 40}}
+                        />
+                        <Text style={styles.bigText}>Hola {this.state.user.contactName},</Text>
+                        <Text style={styles.infoText}>Parece que aún no has creado ninguna asignación. Crea una
+                            asignación para poder darle seguimiento.</Text>
+                        <TouchableOpacity
+                            style={styles.fab}
+                            onPress={() => this.props.navigation.navigate('New')}>
+                            <Ionicons name='ios-add' size={24} color="white"/>
+                        </TouchableOpacity>
+                    </View>
+                }
+                {
+                    this.state.isLoading &&
+                    <View style={StyleSheet.absoluteFill}>
+                        {/* <LottieView
+                            ref={animation => {
+                                this.animation = animation;
+                            }}
+                            loop={true}
+                            source={require('../constants/loading.json')}
+                        /> */}
+                        <Text style={styles.loadingText}>Espera un instante...</Text>
+                    </View>
+                }
             </View>
         );
     }
 }
-const style = {
-    card: {
-        height: 200,
-        borderWidth: 1,
-        borderRadius: 2,
-        borderColor: '#ddd',
-        borderBottomWidth: 0,
-        shadowColor: '#000',
-        shadowOffset: {width: 0, height: 1},
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
-        elevation: 1,
-        marginTop: 10,
+const styles = StyleSheet.create({
+    container: {
         flex: 1,
-        flexDirection: 'column',
-        justifyContent: "center",
-        alignItems: "stretch"
-
+        paddingTop: 70,
+        paddingHorizontal: 24,
+        backgroundColor: '#F9F9F9',
     },
-    subject: {
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 20,
-        width: '70%'
-    },
-    date: {
-        width: '30%',
-        paddingTop: 10,
-        paddingLeft: 10,
-        fontSize: 20,
+    loadingText: {
+        fontFamily: 'roboto-semibold',
+        color: '#232b33',
+        fontSize: 14,
+        alignSelf: 'center',
+        position: 'absolute',
+        top: (Dimensions.get('window').height / 2) + 50
     },
     plainCard: {
         backgroundColor: 'white',
@@ -167,6 +303,65 @@ const style = {
         marginLeft: 10,
         marginRight: 4,
         paddingHorizontal: 20
+    },
+    cardBody: {
+        paddingVertical: 20,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontFamily: 'roboto-semibold',
+        color: '#595959',
+        marginBottom: 20
+    },
+    cardItem: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginBottom: 10
+    },
+    cardDate: {
+        backgroundColor: '#f2f2f2',
+        paddingVertical: 5,
+        paddingHorizontal: 15,
+        borderRadius: 30,
+        position: 'absolute',
+        top: 50,
+        right: 26,
+    },
+    dateText: {
+        fontFamily: 'roboto-semibold',
+        color: '#595959',
+    },
+    itemDescription: {
+        fontFamily: 'roboto',
+        color: '#595959',
+        fontSize: 14,
+        marginLeft: 16
+    },
+    cardFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#f2f2f2'
+    },
+    footerTitle: {
+        fontFamily: 'roboto-semibold',
+        fontSize: 14,
+        color: '#595959',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    headerBackground: {
+        height: 200,
+        width: Dimensions.get('window').width,
+        position: 'absolute',
+        top: 0,
+        zIndex: -1
     },
     cardStatus: {
         width: 20,
@@ -184,46 +379,89 @@ const style = {
         height: 10,
         borderRadius: 50
     },
-    cardDate: {
-        backgroundColor: '#f2f2f2',
-        paddingVertical: 5,
-        paddingHorizontal: 15,
-        borderRadius: 30,
-        position: 'absolute',
-        top: 50,
-        right: 26,
+    indicatorColor: {
+        width: 8,
+        height: 8,
+        borderRadius: 50,
+        marginTop: 5
     },
-    dateText: {
+    indicator: {
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    indicatorText: {
+        fontSize: 10,
         fontFamily: 'roboto-semibold',
-        color: '#595959',
+        color: '#b8c5dd'
     },
-    cardBody: {
+    indicatorValue: {
+        fontSize: 26,
+        fontFamily: 'roboto-bold',
+        color: '#595959'
+    },
+    topBar: {
+        alignSelf: 'stretch',
         paddingVertical: 20,
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        shadowColor: '#878787',
+        shadowOffset: {width: 0, height: 5},
+        shadowOpacity: 0.2,
+        shadowRadius: 7,
+        elevation: 10,
+        borderRadius: 10
     },
-    cardTitle: {
+    body: {
+        flex: 1,
+        paddingTop: 24
+    },
+    bigText: {
+        fontFamily: 'roboto-semibold',
         fontSize: 18,
-        fontFamily: 'roboto-semibold',
-        color: '#595959',
-        marginBottom: 20
+        color: '#262626'
     },
-    cardItem: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        marginBottom: 10
-    },
-    itemDescription: {
+    infoText: {
+        marginTop: 20,
+        marginBottom: 30,
         fontFamily: 'roboto',
-        color: '#595959',
-        fontSize: 14,
-        marginLeft: 16
+        fontSize: 15,
+        padding: 8,
+        textAlign: 'center',
+        color: '#757575'
     },
-    cardFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+    saveButton: {
         alignItems: 'center',
-        paddingVertical: 20,
-        borderTopWidth: 1,
-        borderTopColor: '#f2f2f2'
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        padding: 10,
+        height: 50,
+        borderRadius: 5,
+        alignSelf: 'center',
+        zIndex: 50,
+        fontFamily: 'roboto-bold',
+        borderWidth: 2,
+        borderColor: 'black'
     },
-};
+    title: {
+        fontSize: 30,
+        fontFamily: 'bebas',
+        color: Colors.WHITE
+    },
+    fab: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#98CC33',
+        padding: 10,
+        width: 65,
+        height: 65,
+        borderRadius: 50,
+        shadowColor: '#98CC33',
+        shadowOffset: {width: 0, height: 1},
+        shadowOpacity: 0.8,
+        shadowRadius: 5,
+        elevation: 10,
+    },
+});
+
