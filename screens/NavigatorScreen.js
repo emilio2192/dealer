@@ -9,7 +9,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MapViewDirections from 'react-native-maps-directions';
 import Colors from '../constants/Colors';
 import {LocationList} from '../components/LocationList';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+// import {TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity} from 'react-native';
 import {getDistance} from 'geolib';
 import Endpoints from '../constants/Endpoints';
 import endpoints from '../constants/Endpoints';
@@ -182,9 +183,13 @@ export default class NavigatorScreen extends React.Component {
                 const responseFinish = assigment.finishAssignment();
                 console.log('FINALIZACION DE ASIGNACION ', responseFinish);
                 clearInterval(globalInterval);
-                await AsyncStorage.clearInterval("assignment");
-                await AsyncStorage.clearInterval("confirmedAssignment");
-                this.props.navigation.navigate('Home');
+                AsyncStorage.removeItem("assignment", () => {
+                    AsyncStorage.removeItem("confirmedAssignment", () => {
+                        this.props.navigation.navigate('Main');
+                    });
+                });
+                 
+                
             }
         } else {
             Alert.alert(

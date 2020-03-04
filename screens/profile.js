@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     },
     actionCard: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         alignItems: 'center',
         marginHorizontal: 12,
         paddingVertical: 26,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
         bottom: 50,
         left: 0,
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
     },
     signOutBtn: {
         flexDirection: 'row',

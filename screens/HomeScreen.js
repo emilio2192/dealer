@@ -8,7 +8,8 @@ import {getLocation} from '../services/location-service';
 
 import * as geolib from 'geolib';
 import LottieView from "lottie-react-native";
-import {TouchableOpacity} from "react-native-gesture-handler";
+// import {TouchableOpacity} from "react-native-gesture-handler";
+import {TouchableOpacity} from 'react-native';
 import * as Font from "expo-font";
 
 // import Image from "react-native-web/dist/exports/Image";
@@ -31,17 +32,6 @@ export default class HomeScreen extends React.Component {
     };
 
     async componentDidMount() {
-        // await Font.loadAsync({
-        //     'roboto-bold': require('../assets/fonts/Roboto/Roboto-Bold.ttf'),
-        //     'roboto-black': require('../assets/fonts/Roboto/Roboto-Black.ttf'),
-        //     Roboto: require('../assets/fonts/Roboto/Roboto-Regular.ttf'),
-        //     'roboto-thin': require('../assets/fonts/Roboto/Roboto-Thin.ttf'),
-        //     'roboto-light': require('../assets/fonts/Roboto/Roboto-Light.ttf'),
-        //     'roboto-semibold': require('../assets/fonts/Roboto/Roboto-Medium.ttf'),
-        //     'bebas': require('../assets/fonts/bebas_neue/BebasNeue-Regular.ttf'),
-        // });
-        // // xs
-        
         await AsyncStorage.setItem('userStatus', 'false');
         this.setState({userStatus: 'false'});
         const userStatus = await AsyncStorage.getItem('userStatus');
@@ -60,6 +50,7 @@ export default class HomeScreen extends React.Component {
             this.setState({interval: null});
             this.startGetAssignments();
         }
+        console.log("==============++>", user);
 
         this.setState({userStatus});
 
@@ -184,8 +175,8 @@ export default class HomeScreen extends React.Component {
             onPress={() => this.changeStatus()}
             style={{
                 padding: 5,
-                height: 200,
-                width: 200,  //The Width must be the same as the height
+                height: 170,
+                width: 170,  //The Width must be the same as the height
                 borderRadius: 400, //Then Make the Border Radius twice the size of width or Height  AW-EVuOj0
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -217,19 +208,19 @@ export default class HomeScreen extends React.Component {
                         flex: 6,
                         flexDirection: 'column',
                         backgroundColor: 'white',
-                        zIndex: 11,
+                        zIndex: 15,
                         paddingTop: 50
                     }}>
                         <View style={{flex: 1, alignItems: 'center'}}>
                             <Image style={styles.avatar} source={require('../assets/images/user.png')}/>
                         </View>
-                        <View style={{flex: 1, justifyContent: 'stretch'}}>
+                        <View style={{flex: 1, justifyContent: 'center'}}>
                             <Text style={{fontSize: 24, padding: 5, textAlign: 'center'}}>
-                                Hola Emilio, tienes una nueva asignación a {this.state.distance} km
+                                Hola {this.state.user.contactName}, tienes una nueva asignación a {this.state.distance} km
                             </Text>
                         </View>
                         <View style={{flex: 2, marginBottom: 40}}>
-                            <LottieView
+                            {/* <LottieView
                                 ref={animation => {
                                     this.animation = animation;
                                 }}
@@ -241,9 +232,9 @@ export default class HomeScreen extends React.Component {
                                 autoPlay={true}
                                 loop={true}
                                 source={require('../constants/dealer.json')}
-                            />
+                            /> */}
                         </View>
-                        <View style={{flex: 2, padding: 5}}>
+                        <View style={{flex: 2, padding: 5, zIndex: 99}}>
                             <TouchableOpacity
                                 style={styles.blueButton}
                                 onPress={() => this.aceptAssignment()}>
@@ -258,8 +249,8 @@ export default class HomeScreen extends React.Component {
                         </View>
                     </View>
                 </Modal>
-                {/*{this.displayIconStatus()}*/}
-                <View style={{flex: 1, justifyContent: 'strech', alignItems: "center"}}>
+
+                <View style={{flex: 1, justifyContent: 'center', alignItems: "center"}}>
                     <Image style={{
                         resizeMode: 'contain',
                         width: 400,
@@ -268,13 +259,13 @@ export default class HomeScreen extends React.Component {
                     }}
                            source={require('../assets/images/motorista.png')}/>
                 </View>
-                <View style={{flex: 1, justifyContent: 'strech', alignItems: "flex-start"}}>
+                <View style={{flex: 1, justifyContent: 'center', alignItems: "flex-start"}}>
                     <Text style={{fontSize: 20, paddingLeft: 10, paddingRight:10, textAlign: 'center'}}>
                         Hola {this.state.user.contactName} hoy haz realizado {this.state.summary.assignments} asignaciones y en este mes llevas un total de
-                        {this.state.summary.total} mantente conectado y sigue ganando.
+                        {" "}{this.state.summary.total} mantente conectado y sigue ganando.
                     </Text>
                 </View>
-                <View style={{flex: 1, justifyContent: 'strech', alignItems: "center"}}>
+                <View style={{flex: 1, justifyContent: 'center', alignItems: "center"}}>
                     {this.state.userStatus === 'false' ? this.getOfflineButton() : this.getOnlineButton()}
                 </View>
 
@@ -321,7 +312,7 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 5,
         alignSelf: 'stretch',
-        zIndex: 10,
+        zIndex: 20,
         fontFamily: 'Roboto-Bold',
         marginTop: 20
     },
@@ -335,7 +326,7 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 5,
         alignSelf: 'stretch',
-        zIndex: 10,
+        zIndex: 20,
         fontFamily: 'Roboto-Bold',
         marginTop: 20
     }
