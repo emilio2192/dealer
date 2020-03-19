@@ -184,7 +184,9 @@ export default class NavigatorScreen extends React.Component {
                 console.log('FINALIZACION DE ASIGNACION ', responseFinish);
                 clearInterval(globalInterval);
                 AsyncStorage.removeItem("assignment", () => {
-                    AsyncStorage.removeItem("confirmedAssignment", () => {
+                    AsyncStorage.removeItem("confirmedAssignment", async () => {
+                        await AsyncStorage.setItem('userStatus', 'true');
+                        clearInterval(this.state.interval);
                         this.props.navigation.navigate('Main');
                     });
                 });

@@ -11,6 +11,7 @@ import LottieView from "lottie-react-native";
 // import {TouchableOpacity} from "react-native-gesture-handler";
 import {TouchableOpacity} from 'react-native';
 import * as Font from "expo-font";
+import {NavigationEvents} from 'react-navigation';
 
 // import Image from "react-native-web/dist/exports/Image";
 
@@ -36,11 +37,12 @@ export default class HomeScreen extends React.Component {
         const userStatus = await AsyncStorage.getItem('userStatus');
         const user = await AsyncStorage.getItem('userInformation');
         const summary = await assigment.summary(user.id);
-        this.setState({user: JSON.parse(user), summary:summary.summaryMonth});
+        this.setState({user: JSON.parse(user), summary:summary.summaryMonth, userStatus: userStatus});
+        
         if (userStatus === null) {
             await AsyncStorage.setItem('userStatus', 'false');
             this.setState({userStatus: 'false'});
-        }
+        } 
         if (userStatus === 'false') {
             this.stopAssignment();
         } else {
@@ -49,7 +51,6 @@ export default class HomeScreen extends React.Component {
             this.setState({interval: null});
             this.startGetAssignments();
         }
-        console.log("==============++>", user);
 
         this.setState({userStatus});
 
@@ -86,6 +87,22 @@ export default class HomeScreen extends React.Component {
         }
 
     };
+
+    verifyUserStatus = async () => {
+        const userStatus = await AsyncStorage.getItem('userStatus');
+        if (userStatus === null) {
+            await AsyncStorage.setItem('userStatus', 'false');
+            this.setState({userStatus: 'false'});
+        } 
+        if (userStatus === 'false') {
+            this.stopAssignment();
+        } else {
+            await AsyncStorage.setItem('userStatus', 'true');
+            clearInterval(this.state.interval);
+            this.setState({interval: null});
+            this.startGetAssignments();
+        }
+    }
 
     startGetAssignments = () => {
         const interval = setInterval(async () => {
@@ -198,6 +215,7 @@ export default class HomeScreen extends React.Component {
                 zIndex: 11,
                 paddingTop: 50
             }}>
+                <NavigationEvents onDidFocus={() => this.verifyUserStatus() } />
                 <Modal
                     animationType="slide"
                     transparent={false}
