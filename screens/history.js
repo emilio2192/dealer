@@ -120,6 +120,7 @@ export default class History extends React.Component {
     }
 
     render() {
+        console.log(this.state.assignments);
         return (
             <View style={styles.container}>
                 <NavigationEvents onDidFocus={() => this.fetchAssignments()}/>
@@ -128,13 +129,10 @@ export default class History extends React.Component {
                 {
                     !this.state.isLoading && this.state.assignments.length > 0 &&
                     <View style={styles.header}>
-                        <Text style={styles.title}>Asignaciones</Text>
-                        <TouchableOpacity
-                            onPress={() => this.props.navigation.navigate('New')}>
-                            <Ionicons name='ios-add' size={35} color={Colors.WHITE} />
-                        </TouchableOpacity>
+                        <Image style={{width: 60, height: 60, resizeMode: "contain",}} source={require("../assets/images/kangaroo.png")} />
+                        <Text style={styles.title}>Tus Asignaciones realizadas</Text>
                     </View>
-                }
+                } 
                 {
                     !this.state.isLoading && this.state.assignments.length > 0 &&
                     <Image style={styles.headerBackground}
@@ -194,7 +192,7 @@ export default class History extends React.Component {
                                             //         active: true,
                                             //         assignmentId: item.assignmentID,
                                             //         price: item.price   
-                                            //     }
+                                            //     } 
                                             // )}
                                             style={styles.cardBody}>
                                             <Text style={styles.cardTitle}>{item.subject.subject}</Text>
@@ -204,12 +202,16 @@ export default class History extends React.Component {
                                             </View>
                                             
                                             <View style={styles.cardItem}>
-                                                <MaterialCommunityIcons name="currency-btc" size={16} color="#595959"/>
+                                                <MaterialCommunityIcons name="credit-card" size={16} color="#595959"/>
                                                 <Text style={styles.itemDescription}>{"Tipo de pago: " + (item.paymentMethod === "cdcard"? "Tarjeta" : "Efectivo")}</Text>
                                             </View>
                                             <View style={styles.cardItem}>
                                                 <MaterialCommunityIcons name="cash" size={16} color="#595959"/>
                                                 <Text style={styles.itemDescription}>{"Pagada:"+(item.messengerPaid? "Si" : "No")}</Text>
+                                            </View>
+                                            <View style={styles.cardItem}>
+                                                <MaterialCommunityIcons name="cash" size={16} color="#595959"/>
+                                                <Text style={styles.itemDescription}>{"Valor: Q"+(item.price ? item.price: 0)}</Text>
                                             </View>
                                       
                                         </TouchableOpacity>
@@ -302,7 +304,7 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         marginLeft: 10,
         marginRight: 4,
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
     },
     cardBody: {
         paddingVertical: 20,
@@ -352,12 +354,12 @@ const styles = StyleSheet.create({
         color: '#595959',
     },
     header: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
     },
     headerBackground: {
-        height: 200,
+        height: 250,
         width: Dimensions.get('window').width,
         position: 'absolute',
         top: 0,
