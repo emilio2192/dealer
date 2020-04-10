@@ -207,8 +207,8 @@ export default class HomeScreen extends React.Component {
         onPress={() => this.changeStatus()}
         style={{
           padding: 5,
-          height: 170,
-          width: 170, //The Width must be the same as the height
+          height: 140,
+          width: 140, //The Width must be the same as the height
           borderRadius: 400, //Then Make the Border Radius twice the size of width or Height  AW-EVuOj0
           justifyContent: "center",
           alignItems: "center",
@@ -230,8 +230,8 @@ export default class HomeScreen extends React.Component {
         onPress={() => this.changeStatus()}
         style={{
           padding: 5,
-          height: 150,
-          width: 150, //The Width must be the same as the height
+          height: 140,
+          width: 140, //The Width must be the same as the height
           borderRadius: 400, //Then Make the Border Radius twice the size of width or Height  AW-EVuOj0
           justifyContent: "center",
           alignItems: "center",
@@ -400,13 +400,9 @@ export default class HomeScreen extends React.Component {
               <Text style={{ fontSize: 14, textAlign: "center" }}>Mes</Text>
             </View>
           </View>
-          <Text style={{ fontSize: 20, textAlign: "center" }}>
+          <Text style={{ fontSize: 20, textAlign: "center", marginBottom: 20 }}>
             ¿Estás listo para seguir?
           </Text>
-        </View>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
           {this.state.userStatus === "false"
             ? this.getOfflineButton()
             : this.getOnlineButton()}

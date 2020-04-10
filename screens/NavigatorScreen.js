@@ -33,6 +33,7 @@ import endpoints from "../constants/Endpoints";
 import { gateway } from "../services/gateway";
 
 import constants from "../constants/Server";
+import server from "../constants/Server";
 
 let savedRegion;
 const { width, height } = Dimensions.get("window");
@@ -77,7 +78,7 @@ export default class NavigatorScreen extends React.Component {
     const assignmentId = await AsyncStorage.getItem("assignment");
     // const assignmentId = 'x_lTRmuZF';
     console.log("ID ASSIGNMENT" + assignmentId);
-    console.log("URL ------", Endpoints.GetAssignement(assignmentId));
+
     const response = await gateway(
       Endpoints.GetAssignement(assignmentId),
       "GET"
@@ -132,19 +133,17 @@ export default class NavigatorScreen extends React.Component {
       // });
       // this.animate(data.latitude, data.longitude);
 
-      console.log("locations", data);
       let user = await AsyncStorage.getItem("userInformation");
       user = JSON.parse(user);
       const dataSend = {
         assignmentId: user.id,
         newLocation: `${data.latitude},${data.longitude}`
       };
-      const response = fetch(endpoints.changeMessengerLocationAssigment, {
+      fetch(server.domain + endpoints.changeMessengerLocationAssigment, {
         method: "POST",
         headers: constants.headers,
         body: JSON.stringify(dataSend)
       });
-      console.log("update ", response);
     });
   }
 
@@ -187,22 +186,17 @@ export default class NavigatorScreen extends React.Component {
       const index = locations.findIndex(element => {
         return element.active;
       });
-      console.log("INDEX POINT current", index);
       if (index !== locations.length - 1) {
         locations[index].active = false;
         locations[index].status = 2;
         const responseFinish = assigment.endLocation(locations);
-        console.log("FINALIZACION DE PUNTO ", responseFinish);
         locations[index + 1].active = true;
         this.setState({ item: { locations } });
         // ultimo punto
       } else if (index == locations.length - 1) {
-        console.log("ultimo punto");
         locations[index].status = 2;
         const responsePoint = assigment.endLocation(locations);
-        console.log("FINALIZACION DE PUNTO ", responsePoint);
         const responseFinish = assigment.finishAssignment();
-        console.log("FINALIZACION DE ASIGNACION ", responseFinish);
         clearInterval(globalInterval);
         AsyncStorage.removeItem("assignment", () => {
           AsyncStorage.removeItem("confirmedAssignment", async () => {
@@ -231,13 +225,12 @@ export default class NavigatorScreen extends React.Component {
       item.locations.find(element => {
         return typeof element.active !== "undefined" && element.active;
       });
-    console.log("test 1");
-    console.log(item);
-    console.log("test 1");
+    console.log(activeElement);
     return (
       <ScrollView style={[styles.container]}>
         {item.locations && (
           <MapView
+            fitToElements={MapView.ANIMATED_FIT}
             provider={PROVIDER_GOOGLE}
             customMapStyle={GOOGLE.MinimalMap}
             initialRegion={{
@@ -256,11 +249,6 @@ export default class NavigatorScreen extends React.Component {
               top: 0,
               left: 0,
               right: 0
-            }}
-            region={{
-              ...this.state.region,
-              latitudeDelta: LATITUDE_DELTA,
-              longitudeDelta: LONGITUDE_DELTA
             }}
             ref={c => (this.mapView = c)}
           >
@@ -318,7 +306,7 @@ export default class NavigatorScreen extends React.Component {
               Método de pago:
               {item.paymentMethod === "cdcard" ? "Tarjeta" : "Efectivo"}
             </Text>
-            {item.subject.contactName ? (
+            {item.subject && item.subject.contactName ? (
               <Text
                 style={{ fontWeight: "bold", color: Colors.DARK, fontSize: 14 }}
               >
