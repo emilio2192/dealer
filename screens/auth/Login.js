@@ -1,12 +1,14 @@
 import React from "react";
-import {AsyncStorage, Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import { AsyncStorage, Dimensions, Image, StyleSheet, Text, TextInput, TouchableOpacity, View, } from "react-native";
 import communStyles from '../../constants/CommunStyles';
 import constants from '../../constants/Server';
 import endpoints from '../../constants/Endpoints';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {SafeAreaView} from 'react-navigation';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { SafeAreaView } from 'react-navigation';
+import registerForPushNotificationsAsync from '../../components/registerForPushNotificationsAsync';
+import { Notifications } from 'expo';
 
-import {KeyboardAvoidingView} from 'react-native';
+import { KeyboardAvoidingView } from 'react-native';
 
 
 import LottieView from "lottie-react-native";
@@ -31,34 +33,34 @@ export class LoginScreen extends React.Component {
         };
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         console.log('login');
-        // await Font.loadAsync({
-        //
-        //     'roboto-bold': require('../../assets/fonts/Roboto/Roboto-Bold.ttf'),
-        //     'roboto-black': require('../../assets/fonts/Roboto/Roboto-Black.ttf'),
-        //     'roboto': require('../../assets/fonts/Roboto/Roboto-Regular.ttf'),
-        //     'roboto-thin': require('../../assets/fonts/Roboto/Roboto-Thin.ttf'),
-        //     'roboto-light': require('../../assets/fonts/Roboto/Roboto-Light.ttf'),
-        //     'roboto-semibold': require('../../assets/fonts/Roboto/Roboto-Medium.ttf'),
-        //     'bebas': require('../../assets/fonts/bebas_neue/BebasNeue-Regular.ttf')
-        // });
+
     }
+    _handleNotification = ({ origin, data }) => {
+        // do whatever you want to do with the notification
+        console.log("hola mundo es una push");
+        console.log(data);
+        if(data.type=="newAssignment"){
+            this.props.navigation.navigate('Main',{data: data.data});
+        }
+        // this.setState({ notification: data });
+    };
 
     login = async () => {
         try {
-            if(!this.forceUpdate){
+            if (!this.forceUpdate) {
                 return;
             }
-            this.setState({sending: true});
+            this.setState({ sending: true });
             let response = await fetch(constants.domain + endpoints.signIn, {
                 method: 'POST',
                 headers: constants.headers,
                 body: JSON.stringify(this.state.data)
             });
-            console.log('LOGIN ',response);
+            // console.log('LOGIN ', response);
             const responseJson = await response.json();
-            console.log('LOGIN ',responseJson);
+            console.log('LOGIN ', responseJson);
             const verified = responseJson.verified;
             if (response.status === 401 && response.ok === false && verified === false) {
                 this.props.navigation.navigate('Verify');
@@ -68,18 +70,20 @@ export class LoginScreen extends React.Component {
                 await AsyncStorage.setItem("token", JSON.stringify(responseJson.token));
                 await AsyncStorage.setItem("userInformation", JSON.stringify(responseJson.user));
                 await AsyncStorage.setItem("userStatus", "false");
+                await registerForPushNotificationsAsync(responseJson.user.id);
+                this._notificationSubscription = Notifications.addListener(this._handleNotification);
                 this.props.navigation.navigate('Main');
             } else {
-                alert(body.msg);
-                console.log(responseJson);
+                alert(responseJson.msg);
+                // console.log(responseJson);
             }
-            this.setState({sending: false});
+            this.setState({ sending: false });
         } catch (e) {
             console.log("ERROR ", e);
         }
     };
 
-    _scrollToInput (reactNode) {
+    _scrollToInput(reactNode) {
         // Add a 'scroll' ref to your ScrollView
         this.scroll.props.scrollToFocusedInput(reactNode)
     }
@@ -97,29 +101,29 @@ export class LoginScreen extends React.Component {
                     scrollEnabled={false}>
                     <KeyboardAvoidingView style={styles.formContainer} behavior="padding" enabled>
                         <Image style={styles.logo}
-                               source={require('../../assets/images/logo.png')} />
+                            source={require('../../assets/images/logo.png')} />
                         <Text style={styles.textInput}>Usuario:</Text>
                         <TextInput style={styles.inputStyle}
-                                   onChangeText={(text) => this.setState({ data: { ...this.state.data, username: text } })}
-                                   keyboardType='email-address'
-                                   returnKeyType='next'
-                                   onSubmitEditing={() => { this.password.focus(); }}
-                                   blurOnSubmit={false}
-                                   onFocus={(event) => {
-                                       this._scrollToInput(event.target)
-                                   }}
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, username: text } })}
+                            keyboardType='email-address'
+                            returnKeyType='next'
+                            onSubmitEditing={() => { this.password.focus(); }}
+                            blurOnSubmit={false}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
                         />
                         <Text style={styles.textInput}>Contrase&ntilde;a:</Text>
                         <TextInput style={styles.inputStyle}
-                                   ref={(input) => { this.password = input; }}
-                                   secureTextEntry={true}
-                                   onChangeText={(text) => this.setState({ data: { ...this.state.data, password: text } })}
-                                   textContentType='password'
-                                   returnKeyType='done'
-                                   onSubmitEditing={() => { this.login() }}
-                                   onFocus={(event) => {
-                                       this._scrollToInput(event.target)
-                                   }}
+                            ref={(input) => { this.password = input; }}
+                            secureTextEntry={true}
+                            onChangeText={(text) => this.setState({ data: { ...this.state.data, password: text } })}
+                            textContentType='password'
+                            returnKeyType='done'
+                            onSubmitEditing={() => { this.login() }}
+                            onFocus={(event) => {
+                                this._scrollToInput(event.target)
+                            }}
                         />
                         <View style={[styles.rowLink, { paddingTop: 0 }]}>
                             <Text style={styles.register} onPress={() => this.props.navigation.navigate('RequestChangePass')}>Recuperar
@@ -134,11 +138,11 @@ export class LoginScreen extends React.Component {
                                     <Text style={{ color: 'white', fontFamily: 'roboto-bold' }}>INGRESAR</Text>
                                 }
                                 {this.state.sending &&
-                                <LottieView
-                                    ref={c => this._playAnimation(c)}
-                                    source={require('../../constants/sending.json')}
-                                    loop={true}
-                                />
+                                    <LottieView
+                                        ref={c => this._playAnimation(c)}
+                                        source={require('../../constants/sending.json')}
+                                        loop={true}
+                                    />
                                 }
                             </TouchableOpacity>
                         </View>

@@ -85,7 +85,7 @@ export default class NavigatorScreen extends React.Component {
     );
     console.log("RESPONSE", response);
     let item = response.Assignment;
-
+    
     item.locations = await item.locations.map(item => {
       let newItem = item;
       newItem["active"] = false;
@@ -101,7 +101,12 @@ export default class NavigatorScreen extends React.Component {
     }
 
     console.log("IIIIIITEEEEEEM", item);
-    this.setState({ item });
+    this.setState({ 
+      item, 
+      contactPhone: item.subject.contactPhone, 
+      contactName: item.subject.contactName,
+      paymentMethod: item.paymentMethod
+    });
     this.forceUpdate();
     console.log("ITEM " + this.state.item);
     /*this.getInitialState();
@@ -304,20 +309,20 @@ export default class NavigatorScreen extends React.Component {
               style={{ fontWeight: "bold", color: Colors.DARK, fontSize: 14 }}
             >
               Método de pago:
-              {item.paymentMethod === "cdcard" ? "Tarjeta" : "Efectivo"}
+              {this.state.paymentMethod === "cdcard" ? "Tarjeta" : "Efectivo"}
             </Text>
-            {item.subject && item.subject.contactName ? (
+            { this.state.contactName ? (
               <Text
                 style={{ fontWeight: "bold", color: Colors.DARK, fontSize: 14 }}
               >
-                Contacto: {item.subject.contactName}
+                Contacto: {this.state.contactName}
               </Text>
             ) : null}
-            {item.subject.contactPhone ? (
+            {this.state.contactPhone ? (
               <Text
                 style={{ fontWeight: "bold", color: Colors.DARK, fontSize: 14 }}
               >
-                Teléfono: {item.subject.contactPhone}
+                Teléfono: {this.state.contactPhone}
               </Text>
             ) : null}
             <View style={{ paddingTop: 20 }}>
