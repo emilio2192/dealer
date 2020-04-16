@@ -18,5 +18,6 @@ export default {
     GetAssignement: (id) => `/assignment/${id}`,
     endPointLocation: '/assignment/update-locations',
     finishAssignment: '/assignment/finish',
-    summary: '/user/messenger/summary'
+    summary: '/user/messenger/summary',
+    registerDevice: '/user/set-device'
 }

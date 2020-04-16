@@ -2,9 +2,11 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Notifications } from 'expo';
 import * as Permissions from 'expo-permissions';
-const PUSH_ENDPOINT = 'http://192.168.0.3:3000/push';
+import server from '../constants/Server';
+import endpoints from '../constants/Endpoints';
+const PUSH_ENDPOINT = server.domain+endpoints.registerDevice;
 
-export default async function registerForPushNotificationsAsync(userId) {
+export default async function registerForPushNotificationsAsync(userId, tokenJWT) {
     // Permissions.getAsync(Permissions.Notifications);
     const { status: existingStatus } = await Permissions.getAsync(
         Permissions.NOTIFICATIONS
@@ -31,10 +33,10 @@ export default async function registerForPushNotificationsAsync(userId) {
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
+                'Authorization' : tokenJWT
             },
             body: JSON.stringify({
-                token: token,
-                userId: userId
+                tokenDeviceId: token
             }),
         });
     } catch (e) {
