@@ -290,7 +290,7 @@ export default class HomeScreen extends React.Component {
                 marginTop: 40
               }}
             >
-              tienes una nueva asignación a {this.state.distance} km
+              Tienes una nueva asignación a {this.state.distance} km
             </Text>
             <Text
               style={{

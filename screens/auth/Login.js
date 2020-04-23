@@ -70,7 +70,7 @@ export class LoginScreen extends React.Component {
                 await AsyncStorage.setItem("token", JSON.stringify(responseJson.token));
                 await AsyncStorage.setItem("userInformation", JSON.stringify(responseJson.user));
                 await AsyncStorage.setItem("userStatus", "false");
-                await registerForPushNotificationsAsync(responseJson.user.id);
+                await registerForPushNotificationsAsync(responseJson.user.id, responseJson.token);
                 this._notificationSubscription = Notifications.addListener(this._handleNotification);
                 this.props.navigation.navigate('Main');
             } else {
